@@ -1,0 +1,17 @@
+{
+  "name": "dapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "startNode": "./index.mjs"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "@terra-money/terra.js": "^3.0.10"
+  },
+  "devDependencies": {
+    "babel-register": "^6.26.0"
+  }
+}

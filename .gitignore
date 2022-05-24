@@ -1,0 +1,7 @@
+
+*node_modules
+*package-lock.json
+*.zip
+resource/docker/wordPress/data
+resource/docker/wordPress/html
+

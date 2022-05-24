@@ -1,0 +1,16 @@
+{
+  "name": "dapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "node": "node ./other/parse.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "@ethereumjs/tx": "^3.5.1",
+    "ethers": "^5.6.6",
+    "web3": "^1.7.1"
+  }
+}

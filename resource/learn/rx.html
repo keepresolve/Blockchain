@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/@reactivex/rxjs@5.0.0/dist/global/Rx.js"></script>
+  </head>
+  <body>
+    <div>
+      <button>fromEvent</button>
+    </div>
+    <script>
+      var button = document.querySelector("button");
+      Rx.Observable.fromEvent(button, "click").subscribe(() => console.log("Clicked!"));
+
+      
+      const { Observable } = Rx;
+      var observable = Observable.create(function (observer) {
+        observer.next("Jerry"); // RxJS 4.x 以前的版本用 onNext
+        observer.next("Anna");
+      });
+
+      // 订阅 observable
+      observable.subscribe(function (value) {
+        console.log("change", value);
+      });
+    </script>
+  </body>
+</html>

@@ -138,18 +138,18 @@
         }
 
         async connect() {
-          try {
-            const r = await window.ethereum.request({ method: "eth_requestAccounts" });
+          try {  
+            const r = await window.ethereum.request({ method: "eth_requestAccounts" }); // 授权
           } catch (error) {
             console.log(error);
           }
 
-          this.web3 = new Web3(ethereum);
-          const [address] = await this.web3.eth.getAccounts();
-          const chainId = await this.web3.eth.getChainId();
+          // this.web3 = new Web3(ethereum);
+          // const [address] = await this.web3.eth.getAccounts();
+          // const chainId = await this.web3.eth.getChainId();
 
-          // const [ address ] =  await ethereum.request( { method:"eth_accounts" })
-          // const chainId =  await ethereum.request( { method:"eth_chainId"} )
+          const [ address ] =  await ethereum.request( { method:"eth_accounts" })
+          const chainId =  await ethereum.request( { method:"eth_chainId"} )
           this.selectedAddress = address;
           this.chainId = chainId;
           this.initEvent();
@@ -162,8 +162,8 @@
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId,
-                  chainName: "FTM",
+                  chainId, 
+                  chainName: "Ht",
                   rpcUrls: ["https://ftm.bitkeep.vip/09044be328d4c02bd3d832b8433d97ce"],
                   nativeCurrency: {
                     name: "FTM",
@@ -431,6 +431,7 @@
       //doc
       //https://metamask.github.io/api-playground/api-documentation/#wallet_switchEthereumChain
       // https://github.com/MetaMask/metamask-docs/blob/main/docs/guide/signing-data.md
+      //https://docs.metamask.io/guide/
     </script>
   </body>
 </html>

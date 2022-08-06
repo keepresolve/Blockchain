@@ -1,14 +1,14 @@
 {
-  "name": "dapp",
+  "name": "package",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ./other/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "caoshiyuan",
   "license": "ISC",
   "dependencies": {
-    "tronweb": "^4.1.0"
+    "@web3-onboard/walletconnect": "^2.0.8"
   }
 }

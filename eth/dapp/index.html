@@ -24,6 +24,10 @@
   </head>
   <body>
     <div>
+      <h1>修改钱包</h1>
+      <button data-method="changeWalelt" data-value="bitkeep">bitkeep</button>
+    </div>
+    <div>
       <h1>链接</h1>
       <button data-method="connect">connect</button><span id="account">--</span>
     </div>
@@ -38,6 +42,21 @@
       <button data-method="sendTransaction">sendTranstion</button>
     </div>
 
+    <div>
+      <h1>personal_sign</h1>
+      签名数据: <input id="personal_sign" type="text" />
+      <textarea name="" id="personal_sign_result" cols="30" rows="10"></textarea>
+      <button data-method="personal_sign">personal_sign</button>
+      <code data-code="personal_sign"> </code>
+    </div>
+
+    <div>
+      <h1>sign</h1>
+      签名数据: <input id="sign" type="text" />
+      <textarea name="" id="sign_result" cols="30" rows="10"></textarea>
+      <button data-method="sign">sign</button>
+      <code data-code="sign"> </code>
+    </div>
     <div>
       <h1>批量转账</h1>
       <div style="padding: 0; margin: 0">
@@ -82,6 +101,7 @@
             address: "",
             chainId: window.ethereum ? ethereum.chainId : "",
           };
+          this._walletName = "bitkeep";
           this._config = {
             supportNet: [{}],
             // 代币合约
@@ -133,23 +153,48 @@
           document.querySelector("#account").innerHTML = this.state.address;
           document.querySelector("#from").value = this.state.address;
         }
+
+        get walletName() {
+          return this._walletName;
+        }
+        set walletName(val) {
+          if (this._walletName != val) {
+            this.provider && this.provider.removeAllListeners();
+            this.selectedAddress = "";
+          }
+          this._walletName = val || "bitkeep";
+          const walletBtn = document.querySelector("button[data-method='changeWalelt']");
+          walletBtn.innerText = val;
+          walletBtn.setAttribute("data-value", val);
+        }
+        get provider() {
+          switch (this.walletName) {
+            case "bitkeep":
+              return window.bitkeep && window.bitkeep.ethereum;
+              break;
+            case "injected":
+              return window.ethereum;
+            default:
+              break;
+          }
+        }
         isInstall() {
           return !!window.ethereum;
         }
 
         async connect() {
-          try {  
-            const r = await window.ethereum.request({ method: "eth_requestAccounts" }); // 授权
+          try {
+            const r = await this.provider.request({ method: "eth_requestAccounts" }); // 授权
           } catch (error) {
             console.log(error);
           }
 
-          // this.web3 = new Web3(ethereum);
-          // const [address] = await this.web3.eth.getAccounts();
-          // const chainId = await this.web3.eth.getChainId();
+          this.web3 = new Web3(ethereum);
+          const [address] = await this.web3.eth.getAccounts();
+          const chainId = await this.web3.eth.getChainId();
 
-          const [ address ] =  await ethereum.request( { method:"eth_accounts" })
-          const chainId =  await ethereum.request( { method:"eth_chainId"} )
+          // const [address] = await this.provider.request({ method: "eth_accounts" });
+          // const chainId = await this.provider.request({ method: "eth_chainId" });
           this.selectedAddress = address;
           this.chainId = chainId;
           this.initEvent();
@@ -158,11 +203,11 @@
           chainId = transfer16(chainId);
           try {
             // await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
-            await ethereum.request({
+            await this.provider.request({
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId, 
+                  chainId,
                   chainName: "Ht",
                   rpcUrls: ["https://ftm.bitkeep.vip/09044be328d4c02bd3d832b8433d97ce"],
                   nativeCurrency: {
@@ -192,17 +237,23 @@
           }
         }
         initEvent() {
-          ethereum.removeAllListeners();
-          ethereum.on("accountsChanged", ([address]) => {
+          this.provider &&  this.provider.removeAllListeners();
+          this.provider.on("accountsChanged", ([address]) => {
             this.selectedAddress = address;
           });
-          ethereum.on("chainChanged", async (chainId) => {
+          this.provider.on("chainChanged", async (chainId) => {
             // chainId = await this.web3.eth.getChainId();
-            chainId = await ethereum.request({ method: "eth_chainId" });
+            chainId = await this.provider.request({ method: "eth_chainId" });
             this.chainId = chainId;
           });
         }
-        async sign() {}
+        async request(){
+            return this.provider.request(...arguments)
+        }
+        async sign() {
+          return await web3.eth.sign(web3.utils.sha3(123132131),this.selectedAddress)
+        }
+        // 广播已经交易的签名
         async sendSignedTransaction() {
           // var Tx = require("@ethereumjs/tx").Transaction;
           // var privateKey = Buffer.from("e331b6d69882b4cb4ea581d88e0b604039a3de5967688d3dcffdd2270c0fd109", "hex");
@@ -220,6 +271,7 @@
           // // console.log(serializedTx.toString('hex'));
           // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
         }
+        //签名交易并且在wallet 中广播
         async sendTransaction(data) {
           if (data.contract) {
             const Erc20APIContract = new this.web3.eth.Contract(Erc20API, data.contract, {
@@ -233,13 +285,12 @@
             const decimals = await decimalCall().call();
             const value = String(data.value * 10 ** decimals);
             // decimals >>> 313ce567
-            await ethereum.request({"method":"eth_call","params":[{"data":"0x313ce567","to":"0xde9ff9ab0d042aede7bff0de61d50e272bd08eab"},'latest']})
+            // await this.provider.request({"method":"eth_call","params":[{"data":"0x313ce567","to":"0xde9ff9ab0d042aede7bff0de61d50e272bd08eab"},'latest']})
 
             const result = Erc20APIContract.methods.transfer(data.to, value).send({ from: this.selectedAddress, value: 0 });
             return result.transactionHash;
 
-            
-            // const decimals = await ethereum.request({ method: "eth_call", params: [{ data: "0x313ce567", to: "0xde9ff9ab0d042aede7bff0de61d50e272bd08eab" }, "latest"] });
+            // const decimals = await this.provider.request({ method: "eth_call", params: [{ data: "0x313ce567", to: "0xde9ff9ab0d042aede7bff0de61d50e272bd08eab" }, "latest"] });
 
             // let value =  Number(data.value * 10 ** Number(decimals)).toString(16);
             // let to = new Array(64 -(data.to.substr(2)).length).fill(0).join("") +data.to.substr(2);
@@ -253,18 +304,12 @@
             //   value: "0x0",
             // };
 
-
-            // const result = await window.ethereum.request({ method: "eth_sendTransaction", params: [params] });
-
-       
-
-
+            // const result = await window.this.provider.request({ method: "eth_sendTransaction", params: [params] });
 
             // 0xa9059cbb  >> transfer
-
             // 00000000000000000000000044f0b22e13acbc9ccc6810d4dd7f6d87206ebe64 >> to地址
             // 0000000000000000000000000000000000000000000000000de0b6b3a7640000 >> 转账金额
-            // await window.ethereum.request({ method: 'eth_sendTransaction',
+            // await window.this.provider.request({ method: 'eth_sendTransaction',
             //       params: [
             //           {
             //             from: "" ,
@@ -277,16 +322,21 @@
 
             return result;
           } else {
-            // const result = await this.web3.eth.sendTransaction({
-            //   from: data.from,
-            //   to: data.to, // 和那个地址或者合约进行交互
-            //   value: this.web3.utils.toWei(data.value, "ether"), //主币
-            // });
-            const  result  = await window.ethereum.request({ method: "eth_sendTransaction", params: [{
+            const result = await this.web3.eth.sendTransaction({
               from: data.from,
               to: data.to, // 和那个地址或者合约进行交互
-              value: "0x"+Number(data.value * 10 ** Number(18)).toString(16), //主币
-            }] });
+              value: this.web3.utils.toWei(data.value, "ether"), //主币
+            });
+            // const result = await this.provider.request({
+            //   method: "eth_sendTransaction",
+            //   params: [
+            //     {
+            //       from: data.from,
+            //       to: data.to, // 和那个地址或者合约进行交互
+            //       value: "0x" + Number(data.value * 10 ** Number(18)).toString(16), //主币
+            //     },
+            //   ],
+            // });
 
             return result;
           }
@@ -294,7 +344,7 @@
         //批量转账
         async sendMultTransaction(data) {
           let { addresses, mltcontract, contract } = data;
-          // amounts = amounts.map((num) => this.web3.utils.toWei(num, "ether"));
+          //代币的精度是是需要重新获取的
           const { allAmount, amounts } = data.amounts.reduce(
             (total, num) => {
               let etherVal = this.web3.utils.toWei(num, "ether");
@@ -377,9 +427,21 @@
         el.onclick = async function (event) {
           const { method } = event.target.dataset;
           switch (method) {
+            case "personal_sign":
+              if (true) {
+                document.querySelector("#personal_sign_result").value = await wallet.request({ method: "personal_sign", params: [document.querySelector("#personal_sign").value, wallet.selectedAddress], from: wallet.selectedAddress });
+              }
+
+              break;
+            case "changeWalelt":
+              wallet.walletName = wallet.walletName == "bitkeep" ? "injected" : "bitkeep";
+              break;
             case "connect":
               await wallet.connect();
               await wallet.switchChain(128);
+              break;
+            case "sign":
+               console.log("sign",await wallet.sign()) 
               break;
             case "wallet_switchEthereumChain":
               wallet.switchChain(document.querySelector("#chainId").value);
@@ -428,6 +490,22 @@
       wallet.connect();
       window.wallet = wallet;
 
+      function codeRender(type, data) {
+        const codeDoms = document.querySelectorAll("code[data-code]");
+        const codeDom = document.querySelectorAll("code[data-code=" + type + "]");
+        const codeDomData = document.querySelector("#" + type);
+        switch (type) {
+          case "personal_sign":
+            if (codeDom) {
+              codeDom.innerHTML = `window.ethereum.request({method:"personal_sign", params:[${codeDomData.value}, ${wallet.selectedAddress}], from: ${wallet.selectedAddress}})`;
+            }
+            break;
+
+          default:
+            break;
+        }
+      }
+
       //doc
       //https://metamask.github.io/api-playground/api-documentation/#wallet_switchEthereumChain
       // https://github.com/MetaMask/metamask-docs/blob/main/docs/guide/signing-data.md
@@ -435,3 +513,18 @@
     </script>
   </body>
 </html>
+
+<!-- __jHost('dappsSign', 'ht', JSON.stringify({
+  "coin": "ht",
+         "contract": "",
+         "from": ethereum.selectedAddress,
+         "to": ethereum.selectedAddress,
+         "value": "0.01",
+         "data": "",
+         "nonce": 1114,
+         "gasLimit": "23436",
+         "gasPrice": "0.00000000225",
+         "chainId": "128"
+}), function (err, reply) {
+ console.log(err, reply)
+}) -->

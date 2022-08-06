@@ -14,7 +14,7 @@ var app = express();
 app.use(express.static(path.join(__dirname, "public")));
 app.use(async function (req, res) {
   const state = await new Promise((resolve) => {
-    setInterval(() => {
+    setTimeout(() => {
       resolve({
         list: [
           {

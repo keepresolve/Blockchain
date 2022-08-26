@@ -125,7 +125,7 @@
               let TokenPublicKey = new solanaWeb3.PublicKey(data.contract); //代币合约的PublicKey
                  // Create new token mint
               let TokenInstance = new splToken.Token(connection, TokenPublicKey, splToken.TOKEN_PROGRAM_ID, fromPublicKey);
-              debugger
+
               const {  getOrCreateAssociatedTokenAccount, getOrCreateAssociatedAccountInfo,  mintTo, transfer } = TokenInstance
        
               // const mint = await createMint(connection, fromPublicKey, fromPublicKey, null, 9);

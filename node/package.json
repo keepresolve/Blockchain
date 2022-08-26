@@ -1,0 +1,19 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "1.js",
+  "scripts": {
+    "vueRender": "node ./serverRender/vue.js",
+    "templateRender": "node ./serverRender/template.js",
+    "server": "node ./serverRender/server.js",
+    "servervue": "node ./serverRender/servervue.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1",
+    "vue": "^2.5.13",
+    "vue-server-renderer": "^2.5.13"
+  }
+}

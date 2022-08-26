@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "1.js",
+  "scripts": {
+    "test": "tape -r babel-register tests/**/*.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "devDependencies": {
+    "tape": "^5.5.3"
+  }
+}

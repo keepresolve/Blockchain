@@ -2,6 +2,9 @@
 *node_modules
 *package-lock.json
 *.zip
-resource/docker/wordPress/data
-resource/docker/wordPress/html
+docker/wordpress/db_data
+docker/wordpress/wordpress_data
+resource/
+nginx/
+
 

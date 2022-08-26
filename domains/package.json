@@ -1,0 +1,15 @@
+{
+  "name": "domains",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./address.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "@unstoppabledomains/resolution": "^8.0.0",
+    "web3": "^1.7.3"
+  }
+}

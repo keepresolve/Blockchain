@@ -10,6 +10,7 @@
     <script src="./abi/erc20.js"></script>
     <script src="./abi/poolABI.js"></script>
     <script src="./abi/DemoAbi.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.14.6/vconsole.min.js"></script>
     <style>
       body > div {
         display: flex;
@@ -90,6 +91,7 @@
     <script type="module">
       // import ethsss from   "./node_modules/@ethereumjs/tx/dist.browser/index.js"
       // console.log(ethsss)
+      new VConsole();
       function transfer16(val = 0) {
         val = isNaN(Number(val)) ? 1 : Number(val);
         return "0x" + val.toString(16);
@@ -201,43 +203,51 @@
         }
         async switchChain(chainId) {
           chainId = transfer16(chainId);
+          console.log("switchChain",chainId)
           try {
             // await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
-            await this.provider.request({
+            console.log("wallet_switchEthereumChain", 
+              await this.provider.request({
+                method: "wallet_switchEthereumChain",
+                params: [
+                  {
+                    chainId,
+                    blockExplorerUrls: ["https://moonriver.moonscan.io"],
+                    iconUrls: [],
+                    chainName: "test",
+                    rpcUrls: ["https://rpc.etherfair.org"],
+                    nativeCurrency: {
+                      name: "test",
+                      symbol: "test",
+                      decimals: 18,
+                    },
+                  },
+                ],
+              })
+            );
+          } catch (error) {
+            console.log("wallet_addEthereumChain",error)
+            await ethereum.request({
               method: "wallet_addEthereumChain",
               params: [
-                {
-                  chainId,
-                  chainName: "Ht",
-                  rpcUrls: ["https://ftm.bitkeep.vip/09044be328d4c02bd3d832b8433d97ce"],
-                  nativeCurrency: {
-                    name: "FTM",
-                    symbol: "FTM",
-                    decimals: 18,
+                  {
+                    blockExplorerUrls: ["https://moonriver.moonscan.io"],
+                    iconUrls: [],
+                    chainId: "0x6",
+                    chainName: "etherfair",
+                    rpcUrls: ["https://rpc.etherfair.org"],
+                    nativeCurrency: {
+                      name: "test",
+                      symbol: "test",
+                      decimals: 18,
+                    },
                   },
-                },
               ],
             });
-          } catch (error) {
-            // await ethereum.request({
-            //   method: "wallet_addEthereumChain",
-            //   params: [
-            //     {
-            //       chainId,
-            //       chainName: "FTM",
-            //       rpcUrls: ["https://ftm.bitkeep.vip/09044be328d4c02bd3d832b8433d97ce"],
-            //       nativeCurrency: {
-            //         name: "FTM",
-            //         symbol: "FTM",
-            //         decimals: 18,
-            //       },
-            //     },
-            //   ],
-            // });
           }
         }
         initEvent() {
-          this.provider &&  this.provider.removeAllListeners();
+          this.provider && this.provider.removeAllListeners();
           this.provider.on("accountsChanged", ([address]) => {
             this.selectedAddress = address;
           });
@@ -247,11 +257,11 @@
             this.chainId = chainId;
           });
         }
-        async request(){
-            return this.provider.request(...arguments)
+        async request() {
+          return this.provider.request(...arguments);
         }
         async sign() {
-          return await web3.eth.sign(web3.utils.sha3(123132131),this.selectedAddress)
+          return await web3.eth.sign(web3.utils.sha3(123132131), this.selectedAddress);
         }
         // 广播已经交易的签名
         async sendSignedTransaction() {
@@ -438,10 +448,10 @@
               break;
             case "connect":
               await wallet.connect();
-              await wallet.switchChain(128);
+              // await wallet.switchChain(128);
               break;
             case "sign":
-               console.log("sign",await wallet.sign()) 
+              console.log("sign", await wallet.sign());
               break;
             case "wallet_switchEthereumChain":
               wallet.switchChain(document.querySelector("#chainId").value);

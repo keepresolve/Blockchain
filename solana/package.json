@@ -1,0 +1,17 @@
+{
+  "name": "solana",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "caoshiyuan",
+  "license": "MIT",
+  "scripts": {
+    "test": "node ./signMessage.js"
+  },
+  "devDependencies": {
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
+  },
+  "dependencies": {
+    "bs58": "^5.0.0"
+  }
+}

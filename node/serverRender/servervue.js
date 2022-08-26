@@ -2,6 +2,8 @@ var express = require("express"); // https  createServer
 const fs = require("fs"); //  stream  path
 const path = require("path");
 const Vue = require("vue");
+
+
 const renderer = require("vue-server-renderer").createRenderer();
 // const axios = require("axios")
 
@@ -13,6 +15,7 @@ const renderer = require("vue-server-renderer").createRenderer();
 var app = express();
 app.use(express.static(path.join(__dirname, "public")));
 app.use(async function (req, res) {
+   
   const state = await new Promise((resolve) => {
     setTimeout(() => {
       resolve({

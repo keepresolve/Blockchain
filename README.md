@@ -34,3 +34,26 @@ Blockchain 区块链学习
    
 
 
+
+# 问题
+
+  1. create-react-app 升级后 使用webpack5 去掉了默认支持的包
+    
+    "react-scripts": "^4.0.3" 可以降级处理
+
+
+
+
+
+
+
+# js基础阅读
+   
+ buffer  https://blog.51cto.com/u_14115828/3733415  https://javascript.ruanyifeng.com/nodejs/buffer.html
+
+ base64  https://baike.baidu.com/item/base64/8545775  RFC2045
+
+  ASCII、GB2312、GBK、Unicode    https://c.runoob.com/front-end/6318/  https://baike.baidu.com/item/ASCII/309296?fr=kg_general
+ 
+
+

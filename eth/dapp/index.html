@@ -91,7 +91,8 @@
     <script type="module">
       // import ethsss from   "./node_modules/@ethereumjs/tx/dist.browser/index.js"
       // console.log(ethsss)
-      new VConsole();
+      typeof VConsole !="undefined"  &&  new VConsole();
+     
       function transfer16(val = 0) {
         val = isNaN(Number(val)) ? 1 : Number(val);
         return "0x" + val.toString(16);
@@ -184,6 +185,32 @@
           return !!window.ethereum;
         }
 
+   
+        async switchChain(chainId) {
+          chainId = transfer16(chainId);
+          try {
+            await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
+          } catch (error) {
+            console.log("wallet_addEthereumChain",error.code, error)
+            await ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                  {
+                    blockExplorerUrls: ["https://moonriver.moonscan.io"],
+                    iconUrls: [],
+                    chainId: "0x12313123123",
+                    chainName: "etherfair",
+                    rpcUrls: ["https://rpc.etherfair.org"],
+                    nativeCurrency: {
+                      name: "test",
+                      symbol: "test",
+                      decimals: 18,
+                    },
+                  },
+              ],
+            });
+          }
+        }
         async connect() {
           try {
             const r = await this.provider.request({ method: "eth_requestAccounts" }); // 授权
@@ -200,51 +227,6 @@
           this.selectedAddress = address;
           this.chainId = chainId;
           this.initEvent();
-        }
-        async switchChain(chainId) {
-          chainId = transfer16(chainId);
-          console.log("switchChain",chainId)
-          try {
-            // await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
-            console.log("wallet_switchEthereumChain", 
-              await this.provider.request({
-                method: "wallet_switchEthereumChain",
-                params: [
-                  {
-                    chainId,
-                    blockExplorerUrls: ["https://moonriver.moonscan.io"],
-                    iconUrls: [],
-                    chainName: "test",
-                    rpcUrls: ["https://rpc.etherfair.org"],
-                    nativeCurrency: {
-                      name: "test",
-                      symbol: "test",
-                      decimals: 18,
-                    },
-                  },
-                ],
-              })
-            );
-          } catch (error) {
-            console.log("wallet_addEthereumChain",error)
-            await ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                  {
-                    blockExplorerUrls: ["https://moonriver.moonscan.io"],
-                    iconUrls: [],
-                    chainId: "0x6",
-                    chainName: "etherfair",
-                    rpcUrls: ["https://rpc.etherfair.org"],
-                    nativeCurrency: {
-                      name: "test",
-                      symbol: "test",
-                      decimals: 18,
-                    },
-                  },
-              ],
-            });
-          }
         }
         initEvent() {
           this.provider && this.provider.removeAllListeners();
@@ -281,6 +263,8 @@
           // // console.log(serializedTx.toString('hex'));
           // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
         }
+
+        
         //签名交易并且在wallet 中广播
         async sendTransaction(data) {
           if (data.contract) {

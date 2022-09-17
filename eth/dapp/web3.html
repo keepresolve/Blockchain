@@ -24,9 +24,12 @@
       overflow: auto;
     }
     #statusBar {
-      position: absolute;
-      right: 0;
+      position: fixed;
+      width: 100%;
+      text-align: center;
+      left: 0;
       top: 10px;
+      background-color: #fff;
     }
   </style>
   <body>
@@ -37,7 +40,7 @@
     </div>
 
     <script>
-   
+      const MAX_FETCH = 20;
       const events = {
         events: {},
         on(name, fn) {
@@ -47,22 +50,23 @@
         emit(name, ...arg) {
           if (this.events[name] && this.events[name].length) {
             // while (this.events[name].length) {
-              const tasks = this.events[name] || [];
-              // console.log(tasks)
-              tasks.forEach(({ fn, name }) => {
-                fn.call(this, ...arg);
-              });
+            const tasks = this.events[name] || [];
+            // console.log(tasks)
+            tasks.forEach(({ fn, name }) => {
+              fn.call(this, ...arg);
+            });
             // }
           }
         },
       };
       const _Promise = (function () {
         const list = [];
-        const task_list = 10;
-        async function start() {
-          if (!list.length) await new Promise((resolve) => setTimeout(resolve, 3000));
 
-          const tasks = list.splice(0, task_list);
+        async function start() {
+          if (!list.length) await new Promise((resolve) => setTimeout(resolve, 300));
+
+          const tasks = list.splice(0, MAX_FETCH);
+  
           let progress = {
             total: tasks.length,
             progress: 0,
@@ -75,13 +79,13 @@
               return fn
                 .apply(this, arg)
                 .then((res) => {
-                  progress.progress=progress.progress+1
+                  progress.progress = progress.progress + 1;
                   events.emit("fetch_progress", progress);
                   resolve(res);
                 })
                 .catch((err) => {
-                  progress.progress=progress.progress+1
-                  progress.errorCount=progress.errorCount+1
+                  progress.progress = progress.progress + 1;
+                  progress.errorCount = progress.errorCount + 1;
                   events.emit("fetch_progress", progress);
                   resolve(err);
                 });
@@ -120,7 +124,7 @@
                       `<li>
                         <h3>blockNumber:${v.num}:${v.status}</h3>
                         <h3>:${(v.data.transactions || []).length}</h3>
-                          <textarea cols="300" rows="100" > ${JSON.stringify(v.data, null, 2)}</textarea>
+                          <textarea cols="300" rows="66" > ${JSON.stringify(v.data, null, 2)}</textarea>
                         </li>`
                   )}
               </ul>
@@ -129,6 +133,7 @@
           events.on("fetch_progress", function ({ progress, errorCount, total }) {
             console.log({ progress, errorCount, total });
             document.querySelector("#statusBar").innerHTML = `
+                 MAX_FETCH : ${MAX_FETCH}
                  <span>error:${errorCount}</span>
                  <span>total:${total}</span>
                  <progress value="${progress}"  max='${total}'></progress>
@@ -188,10 +193,11 @@
           return this.getBlockNumberList();
         }
         async getBlockNumberData() {
-          const index = this.blockStore.state.blocks.findIndex((v) => v.status == 0);
+          const blocks = this.blockStore.state.blocks
+          const index = blocks.findIndex((v) => v.status == 0);
 
           if (index != -1) {
-            const blockData = this.blockStore.state.blocks[index];
+            const blockData = blocks[index];
             blockData.status = 1;
             try {
               blockData.data = await _Promise(this.web3.eth.getBlock, blockData.num);
@@ -201,23 +207,26 @@
             }
             this.blockStore.state.blocks[index] = blockData;
           } else {
-            await new Promise((res) => setTimeout(res, 1000));
+            await new Promise((res) => setTimeout(res, 200));
           }
           // await new Promise((res) => setTimeout(res, 5000));
           return this.getBlockNumberData();
         }
 
         async getTransactionData() {
-          const index = this.blockStore.state.blocks.findIndex((v) => v.status == 2 && (v.data.transactions || []).find((v) => typeof v == "string"));
+          
+          try {
+            const blocks = this.blockStore.state.blocks
+            const index = blocks.findIndex((v) => v.status == 2 && v.data && v.data.transactions && v.data.transactions.find((v) => typeof v == "string"));
+            if (index != -1) {
+              const blockData = blocks[index];
 
-          if (index != -1) {
-            const blockData = this.blockStore.state.blocks[index];
-
-            blockData.data.transactions = await Promise.all(blockData.data.transactions.map((v) => _Promise(this.web3.eth.getTransaction, v)));
-            this.blockStore.state.blocks[index] = blockData;
-          } else {
-            await new Promise((res) => setTimeout(res, 1000));
-          }
+              blockData.data.transactions = await Promise.all(blockData.data.transactions.map((v) => _Promise(this.web3.eth.getTransaction, v)));
+              this.blockStore.state.blocks[index] = blockData;
+            } else {
+              await new Promise((res) => setTimeout(res, 300));
+            }
+          } catch (error) {}
 
           this.getTransactionData();
         }

@@ -1,0 +1,24 @@
+{
+  "files": {
+    "background.js": "/static/js/background.js",
+    "contentscript.js": "/static/js/contentscript.js",
+    "core.js": "/static/js/core.js",
+    "inpage.js": "/static/js/inpage.js",
+    "main.js": "/static/js/main.js",
+    "prompt.js": "/static/js/prompt.js",
+    "ajs-destination.js": "/static/js/ajs-destination.046d517c.chunk.js",
+    "legacyVideos.js": "/static/js/legacyVideos.c3df5fe0.chunk.js",
+    "schemaFilter.js": "/static/js/schemaFilter.4b7d0c35.chunk.js",
+    "remoteMiddleware.js": "/static/js/remoteMiddleware.910f8018.chunk.js",
+    "auto-track.js": "/static/js/auto-track.c6536631.chunk.js",
+    "middleware.js": "/static/js/middleware.1b8b3237.chunk.js",
+    "queryString.js": "/static/js/queryString.de902f32.chunk.js",
+    "static/js/164.b669e71b.chunk.js": "/static/js/164.b669e71b.chunk.js",
+    "static/js/696.e7a267bd.chunk.js": "/static/js/696.e7a267bd.chunk.js",
+    "index.html": "/index.html",
+    "prompt.html": "/prompt.html"
+  },
+  "entrypoints": [
+    "static/js/main.js"
+  ]
+}

@@ -20,6 +20,7 @@ Blockchain 区块链学习
  ``` 合约开发
   
 
+# https://remix.run/
 
 
 
@@ -54,6 +55,49 @@ Blockchain 区块链学习
  base64  https://baike.baidu.com/item/base64/8545775  RFC2045
 
   ASCII、GB2312、GBK、Unicode    https://c.runoob.com/front-end/6318/  https://baike.baidu.com/item/ASCII/309296?fr=kg_general
+
+
+
+
+
+## 
+ UTXO 系列记账
+ 1.BTC DOGE  DASH
+
+ ETH以太坊系列 
+ 1.  BNB MATCI ETH  MATIC
+
+ EOS 系列
+ 1. 账户类型 需要创建账号 
+ 1. WAX YTA IOST
+
+ COSMOS系列
+ 1. inj  ATOM
+
+TRON波长
+1. 基于ETH搞的自己规范
+1. VS
+
+其他
+ NEAR 
+ SOLANA 
+ AR FIL  存储
+
+
+ 节点
+ 去中心化   分布式存储 git
+ 
+ 打包挖矿
+  
+   padding池子  手续费
+   
+
  
 
 
+
+
+
+# 
+视频 https://www.bilibili.com/video/av550704547
+https://www.bilibili.com/video/BV1BG4y1v7rE/?spm_id_from=pageDriver&vd_source=f19b5eb763cc193bcf7fe821980bbc13

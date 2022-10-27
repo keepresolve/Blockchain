@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<style>
+  body>div {
+    margin: 20px 0;
+  }
+</style>
+
+<body>
+  <div>
+    <button id="connect_btn">connet</button>
+    <pre id="state"></pre>
+  </div>
+  <div>
+    <textarea rows="20" cols="60" id="signAndSubmitTransaction_params">
+        {
+            "function": "0x1::coin::transfer",
+            "type_arguments": [
+              "0xb72c8e6e97730000a6fff4e598ae7338586dd0c2fc806d984e4ed6f945c61eac::moon_coin::MoonCoin"
+            ],
+            "arguments": [
+              "0x6ae3fe98a42c01dcb805660b4d4b9e2307b9be8021948c1dfd5e2bf5e11305f4",
+              "200000"
+            ],
+       
+            "type": "entry_function_payload"
+          }
+      </textarea>
+    <textarea name="" cols="20" rows="10" id="signAndSubmitTransaction_options">
+      {
+          "gas_unit_price":"200000",
+           "max_gas_amount":"1000"
+     
+         }
+      </textarea>
+    <pre id="signAndSubmitTransaction_result"></pre>
+    <button id="signAndSubmitTransaction_btn">signAndSubmitTransaction</button>
+  </div>
+
+  <div>
+    <textarea rows="20" cols="60" id="signMessage_params">
+        {
+            "address": true,
+            "application": true,
+            "chainId": true,
+            "message": "onClick message sign",
+            "nonce": 123
+          }
+      </textarea>
+    <pre id="signMessage_result"></pre>
+    <button id="signMessage_btn">signMessage_btn</button>
+  </div>
+
+  <script>
+    function _observer(obj) {
+      var queueObserver = new Set();
+      return {
+        state: new Proxy(obj, {
+          set(traget, key, value, target) {
+            var result = Reflect.set(...arguments);
+            queueObserver.forEach((fn) => fn(traget, obj));
+            return result;
+          },
+        }),
+        subscribe(fn) {
+          queueObserver.add(fn);
+        },
+      };
+    }
+
+    class Wallet {
+      constructor() {
+        const {
+          state,
+          subscribe
+        } = _observer({
+          address: "",
+          publicKey: "",
+          chainId: "2",
+        });
+        subscribe(() => {
+          document.querySelector("#state").innerHTML = JSON.stringify(this.state, null, 2);
+          document.querySelector("#connect_btn").disabled = !!this.state.address;
+        });
+
+        this.state = state;
+        this.provide = this.getProvider();
+      }
+
+      getProvider() {
+        return window?.bitkeep ?.aptos;
+      }
+      initEvent() {
+        this.provide.onAccountChange((onAccountChange) => {
+          console.log("onAccountChange", onAccountChange);
+        });
+        this.provide.onNetworkChange((onNetworkChange) => {
+          console.log("onNetworkChange", onNetworkChange);
+        });
+        this.provide.onDisconnect((...arg) => {
+          console.log("onDisconnect", arg);
+        });
+      }
+      async connect() {
+        this.provide = this.getProvider();
+        await this.provide.connect();
+        const {
+          publicKey,
+          address
+        } = await this.provide.account();
+        this.state.network = await this.provide.network();
+        this.state.address = address;
+        this.state.publicKey = publicKey;
+        this.initEvent();
+      }
+      async signAndSubmitTransaction(transaction, options) {
+        return this.provide.signAndSubmitTransaction(transaction, options);
+      }
+      async signMessage(obj) {
+        return this.provide.signMessage(obj);
+      }
+    }
+    const wallet = new Wallet();
+
+    document.querySelector("#connect_btn").onclick = function () {
+      wallet.connect();
+    };
+
+    document.querySelector("#signAndSubmitTransaction_btn").onclick = async function () {
+      const transactionVal = document.querySelector("#signAndSubmitTransaction_params").value;
+      const optionsVal = document.querySelector("#signAndSubmitTransaction_options").value.replace(/ /g,"")
+      const transaction = typeof transactionVal == "string" ? JSON.parse(transactionVal) : transactionVal;
+      const options = typeof optionsVal == "string" && optionsVal ? JSON.parse(optionsVal) : optionsVal;
+      const reulst = await wallet.signAndSubmitTransaction(transaction, options);
+      document.querySelector("#signAndSubmitTransaction_result").innerHTML = JSON.stringify(reulst, null, 2);
+    };
+
+    //  interface SignMessagePayload {
+    //     address?: boolean; // Should we include the address of the account in the message
+    //     application?: boolean; // Should we include the domain of the dapp
+    //     chainId?: boolean; // Should we include the current chain id the wallet is connected to
+    //     message: string; // The message to be signed and displayed to the user
+    //     nonce: string; // A nonce the dapp should generate
+    //   }
+    document.querySelector("#signMessage_btn").onclick = async function () {
+      const signMessage = document.querySelector("#signMessage_params").value;
+      const signData = typeof signMessage == "string" ? JSON.parse(signMessage) : signMessage;
+      const reulst = await wallet.signMessage(signData);
+      document.querySelector("#signMessage_result").innerHTML = JSON.stringify(reulst, null, 2);
+    };
+    wallet.connect();
+  </script>
+</body>
+
+</html>

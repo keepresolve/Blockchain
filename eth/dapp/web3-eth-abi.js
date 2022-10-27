@@ -1,5 +1,4 @@
 var Web3EthAbi = require("web3-eth-abi");
-
 const ecodeApprovaldata = Web3EthAbi.encodeFunctionSignature({
   constant: false,
   inputs: [
@@ -31,8 +30,9 @@ const ecode1155Aprovaldata = Web3EthAbi.encodeFunctionSignature({
   type: "function",
 });
 
-console.log(ecodeApprovaldata, ecode1155Aprovaldata);
+console.log(ecodeApprovaldata,    ecode1155Aprovaldata);
 // doc
 // https://learnblockchain.cn/docs/web3.js/web3-eth-abi.html
 
+Web3EthAbi.decodeParameter('string',ecodeApprovaldata)
 

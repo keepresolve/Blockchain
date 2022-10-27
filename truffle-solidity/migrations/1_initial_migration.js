@@ -1,4 +1,4 @@
-// const Migrations = artifacts.require("Migrations");
+const Migrations = artifacts.require("Migrations");
 
 // module.exports = function (deployer) {
 //   deployer.deploy(Migrations);
@@ -12,7 +12,7 @@
 
 //erc20 token
 
-const SimpleStorage = artifacts.require("SimpleStorage");
+const SimpleStorage = artifacts.require("TokenERC20");
 
 module.exports = function(deployer) {
     deployer.deploy(SimpleStorage);

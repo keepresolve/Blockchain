@@ -18,8 +18,8 @@ pragma solidity >=0.4.22 <0.9.0;
  */
 contract TokenERC20 {
     // Public variables of the token
-    string public name = "ht";
-    string public symbol = "HTTTT";
+    string public name = "httttt";
+    string public symbol = "HCCCC";
     uint8 public decimals = 18;  
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply = 10000;

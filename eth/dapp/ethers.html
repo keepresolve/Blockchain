@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./node_modules/ethers/dist/ethers.umd.min.js"></script>
+    <script src="./js/web3.min.js"></script>
+    <script src="./abi/erc20.js"></script>
+    <script src="./abi/poolABI.js"></script>
+    <script src="./abi/DemoAbi.js"></script>
+  </head>
+  <body>
+    <script>
+      async function init() {
+        //   window.provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        //   await provider.send("eth_requestAccounts", []);
+        //   window.signer = provider.getSigner();
+        //   window.provider1 = new ethers.providers.Web3Provider(window.bitkeep.ethereum);
+        //   await provider1.send("eth_requestAccounts", []);
+
+        //   const r =  new ethers.Contract("0xfe04c1d41502ac0d664b1b41dc23e1a4803188e2", Erc20API, signer);
+        //   window.signer2 = provider.getSigner();
+        //   const a  = new ethers.Contract("0xfe04c1d41502ac0d664b1b41dc23e1a4803188e2", Erc20API, signer);
+
+        ethers.ethers = window._ethers;
+        ethers.voidAddress = ethereum.selectedAddress;
+        ethers.voidProvider = new ethers.ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
+        ethers.voidSigner = new ethers.ethers.VoidSigner(ethers.voidAddress, ethers.voidProvider);
+
+        console.log(ethers.voidSigner, ethers.voidProvider);
+
+        // DAI 代币合约
+        //  let abi = [ "function balanceOf(address) view returns (uint)", "function transfer(address, uint) returns (bool) " ] contract = new ethers.Contract("dai.tokens.ethers.eth", abi, signer)
+
+        //  const instance = new ethers.Contract(contractAddress, abi, signer)
+        //   // 获取该账户的代币数量
+        //  let  tokens = await contract.balanceOf(signer.getAddress())
+        // { BigNumber : "3118000455884268201631" }
+
+        //
+        // 签名者对 DAI 的预飞行（检查还原）
+        //
+        // 注意：此时我们没有私钥，这
+        // 只是让我们检查会发生什么如果我们
+        // 做了。
+        //   这对于在提示之前检查很有用// UI 中的请求
+        //
+
+        // 这将通过，因为代币余额可用
+        // await contract.callStatic.transfer("donations.ethers.eth", tokens)
+        // true
+
+        // 这将失败，因为它大于代币余额
+        // await contract.callStatic.transfer("donations.ethers.eth", tokens.add(1))
+        // [错误：调用恢复异常；处理事务时出现 VM 异常：使用原因字符串“Dai/insufficient-balance”恢复 [参见：https://links.ethers.org/v5-errors-CALL_EXCEPTION ]] {
+        // 地址：'dai.tokens.ethers.eth ',
+        // args: [
+        // 'donations.ethers.eth',
+        // { BigNumber: "3118000455884268201632" }
+        // ],
+        // 代码: '
+        // data: '0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000184461692f696e73756666696369656e742d62616c616e63650000000000000000',
+        // errorArgs: [
+        // 'Dai/insufficient-balance'
+        // ],
+        // errorName: 'Error',
+        // errorSignature: 'Error(string)',
+        // method: ' transfer(address,uint256)',
+        // reason: 'Dai/insufficient-balance',
+        // transaction: {
+        // data: '0xa9059cbb000000000000000000000000643aa0a61eadcc9cc202d1915d942d35d005400c0000000000000000000000000000000000000000000000a906f2dec097d566a0',
+        // from: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
+        // to: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+        // }
+        // }
+        // console.log(await contract.balanceOf.call(signer.getAddress()))
+      }
+      init();
+
+      // var sig = "0xf8ab2d8459682f0083061a8094a71edc38d189767582c38a3145b5873052c3e47a80b844a9059cbb000000000000000000000000e94fc2e39e1614147b1b12dba9f987b69485abeb000000000000000000000000000000000000000000000001a055690d9db80000820124a0621ecb7ac7340a683914a19c97f61fd6b46009ff25dec2c1be2295bc92c0e99ca05a6895146d4a058d620b05bcd87ff4480628ef1d5ec1d095c43e87f5daf10b6d";
+      // var s = ethers.Wallet.parseTransaction(sig);
+      // console.log(s);
+      // console.log('gasPrice:' + parseFloat(s.gasPrice));
+      // console.log('gasLimit:' + parseFloat(s.gasLimit));
+      // console.log('value:' + parseFloat(s.value));
+    </script>
+  </body>
+</html>

@@ -792,7 +792,7 @@ async function signTransaction(payload) {
 
 
     const params = getParams(payload.function, payload.type_arguments, payload.arguments);
-    const abiMap = await fetchABI(params.addr);
+    const abiMap = await fetchABI("0x2");
     const funcAbi = abiMap.get(params.func);
     // Remove all `signer` and `&signer` from argument list because the Move VM injects those arguments. Clients do not
     // need to care about those args. `signer` and `&signer` are required be in the front of the argument list. But we

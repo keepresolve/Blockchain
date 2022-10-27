@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "elliptic": "^6.5.4",
     "geoip-lite": "^1.4.5"
   }
 }

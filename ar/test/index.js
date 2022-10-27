@@ -1,0 +1,39 @@
+const human_crypto_keys = require('human-crypto-keys');
+
+const mnemonic = 'face venue detect arrow zoo wheat thank among skirt vintage regular dove'
+const privateKey =`
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAksF6cSp7USbyuqqWCIXNQpLBRQQ/F0HND1CIBQ8N7PKIT/4p
+ej9WF5Q4EnbBGwyhPtSM/L+BCLGjxBnelSz9SFqsZGKS4XC0UMClwGC2VmX3+qFr
+BPZMikJNjinOu1vL5rOtMWdbNA5vS0dcQSAgHihHjO68bihqOeeMSL8KGWRKUteE
+CG0/td8DDozmPZ/ezCzxdirdqOiwaUvYwckjjXWfyMvbUCFXIsihL7NnCO5//dId
+CYjPpdpxkuVOu5xiBM6uk24cK442c1HY6AZ0tClhpBC7eLP7wRHURnnCzqyFwyTp
+u9v89lgtMvnlXdpk0VvlRe9Yy2fWe8FnV4kg8wIDAQABAoIBAFx0l/cDlH0j1HfV
+UIA+C3qNikU4z6aPRekICylkupk0krwSm37wuARS1KCNQEsSQeObdNcmrtwTTeEV
+iyzgExGqTkFP+Mkef/r/42y3gSgdRYUYfJu7r6zK6KFPpXZT9rl5KPue6c556ZO7
+eVtuKc3WAn2/Seb8fy/LuI18DZjApmJoaGaINj7WfCvCv/vqT3nYsUGJMaam4VVc
+TTnaQV+YHyMIHgCSx3WpKoaxcWiIZf2DZlRdJ932TmHntsA2bihl/tDBEhDteavI
+jTl1nKEHjQUI15pZfHoapPAvH+/84EwF4E7193uibj0rkEaqVFZF8h6v38tRXufH
+aqjXKMECgYEA5gO8eO95J0Nj4Ev6YtVZwUzSyBD63ftTmdsz0Wdpl/wNbBCZF54j
+dQ9fUmzuNDBeuixrBNEU0gpxZ0i4Yrg1eX/tRPpurFn80M3bKQOX8QPBNdaJwXDV
+0MBBUvTMtBPaBZcy1VaGes5eXlwS/t3x2mIzB22Up0c5eQfDJssMWIUCgYEAo1XP
+O52WanJNiDvCNT3ZahumSGIY0IG672RkgAxNOMT8E2iXJ3E0pPZjzPOBV2QVQ1Nz
+3kkyfR3Tzt1CcgpdJYmqjoKHSAZZIaITrHUOS/5bSVZxt8qNUp0RlwcMV/+kHsu6
+P+rGti33REByDVMmho+8CR6hCiMAhK6I7So2iRcCgYEAmLFOQrImqUvxV4rYkxey
+18GaA7pR717SZsa/pXmS/ZQTjPOPzb/rJeColN0/XGHn4ItwF+h8e9r24WvDC7Xh
+ueCUsD/XjI7IaAzgOl/qU9L8RjM/i6zOJCAcvWdJJRowl5mB42HnMEsjFlzlN1A7
+J5Ac9AdosYt0ucXPZUdR0MkCgYBVKRZlpOKaGYKnN1Eo5ViIZGYsc0kw3ZMT4ios
+QT26DarIi83TuMiUAgtC/us/H2WettJA4bU7WuPmhaJxR0oNmluc9h2GxhiO2qyb
+TGTp5nK+KB4ej7NjkZVsQzaCYz20+M/hJ433yruTkG5m2CXMHwERWDDq0hkhFMc7
+sLjCfQKBgQDVSZWGJKIXMBKL9AmvJ57UUNaXDNJniCSSZhhOSZ1BhtKt2HDNlzfK
+6mNF0pDllHZUa8oOdFid9c0YgCzzSokyZqwexQpSx825jhfouSgRfEzRiLMhoxfm
+35+9N8MN5bOmLrLueDDEZAVwSkncII0p1nmw8FjIryhGgJBZNnphWg==
+-----END RSA PRIVATE KEY-----`
+
+async function test(){
+    const keyPair = await human_crypto_keys.getKeyPairFromMnemonic(mnemonic, { id: "rsa", modulusLength: 2048 }, { privateKeyFormat: "pkcs1-pem" });
+  
+      console.log(keyPair.privateKey.trim() == privateKey.trim())
+
+}
+test()

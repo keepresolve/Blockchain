@@ -32,6 +32,7 @@ class App extends React.Component {
       await connector.createSession();
     } else {
       const { chainId, accounts } = connector;
+      debugger
       this.setState({
         selectedAddress: accounts[0],
         chainId: chainId,
@@ -192,6 +193,7 @@ class App extends React.Component {
           <div>
             <h1>链接</h1>
 
+          
             {
               <button disabled={selectedAddress} data-method="connectProvider" onClick={this.connectProvider.bind(this)}>
                 connectProvider

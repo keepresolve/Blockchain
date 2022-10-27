@@ -1231,97 +1231,7 @@ function getAddress(privateKey) {
   let address = hash.hex();
   return address.startsWith("0x") ? address : "0x" + address;
 }
-async function signTransaction(payload) {
-  const utils = {
-    normlize: (s) => s.replace(/^0[xX]0*/g, "0x"),
-    bcsToBytes(value) {
-      const serializer = new Serializer();
-      value.serialize(serializer);
-      return serializer.getBytes();
-    },
-    getParams(func, ty_tags, args) {
-      func = utils.normlize(func);
-      const funcNameParts = func.split("::");
-      const [addr, module] = func.split("::");
-      return {
-        funcNameParts,
-        addr,
-        module,
-        func,
-      };
-    },
-  };
 
-  //接口参数
-  async function fetchABI(addr) {
-    const modules = await client.getAccountModules(addr);
-    const abis = modules
-      .map((module) => module.abi)
-      .flatMap((abi) =>
-        abi.exposed_functions
-          .filter((ef) => ef.is_entry)
-          .map((ef) => ({
-            fullName: `${abi.address}::${abi.name}::${ef.name}`,
-            ...ef,
-          }))
-      );
-
-    const abiMap = new Map();
-    abis.forEach((abi) => {
-      abiMap.set(abi.fullName, abi);
-    });
-
-    return abiMap;
-  }
-
-  if (payload?.sequence_number) {
-    config.sequenceNumber = options.sequence_number;
-  }
-
-  if (payload?.gas_unit_price) {
-    config.gasUnitPrice = options.gas_unit_price;
-  }
-
-  if (payload?.max_gas_amount) {
-    config.maxGasAmount = options.max_gas_amount;
-  }
-
-  if (payload?.expiration_timestamp_secs) {
-    const timestamp = Number.parseInt(options.expiration_timestamp_secs, 10);
-    config.expSecFromNow = timestamp - Math.floor(Date.now() / 1000);
-  }
-
-  const params = utils.getParams(payload.function, payload.type_arguments, payload.arguments);
-  const abiMap = await fetchABI(params.addr);
-  const funcAbi = abiMap.get(params.func);
-  // Remove all `signer` and `&signer` from argument list because the Move VM injects those arguments. Clients do not
-  // need to care about those args. `signer` and `&signer` are required be in the front of the argument list. But we
-  // just loop through all arguments and filter out `signer` and `&signer`.
-  const originalArgs = funcAbi.params.filter((param) => param !== "signer" && param !== "&signer");
-  // Convert string arguments to TypeArgumentABI
-  const typeArgABIs = originalArgs.map((arg, i) => new ArgumentABI(`var${i}`, new TypeTagParser(arg).parseTypeTag()));
-  const entryFunctionABI = new EntryFunctionABI(
-    funcAbi.name,
-    ModuleId.fromStr(`${params.addr}::${params.module}`),
-    "", // Doc string
-    funcAbi.generic_type_params.map((_, i) => new TypeArgumentABI(`${i}`)),
-    typeArgABIs
-  );
-
-  const senderAddress = payload.sender instanceof AccountAddress ? HexString.fromUint8Array(payload.sender) : payload.sender;
-
-  const [{ sequence_number }, chainId] = await Promise.all([client.getAccount(senderAddress), client.getChainId()]);
-
-  const builderABI = TransactionBuilderABI([utils.bcsToBytes(entryFunctionABI)], {
-    sender,
-    sequenceNumber: sequence_number,
-    chainId,
-    ...payload,
-  });
-  const r = await builderABI.build(params.func, payload.type_arguments, payload.arguments);
-
-  return r;
-}
 
 async function signTransaction1(payload, account1) {
   const RAW_TRANSACTION_SALT = "APTOS::RawTransaction";
@@ -1779,3 +1689,119 @@ async function signTransaction1(payload, account1) {
     console.log(error);
   }
 })();
+
+
+
+
+{"0":255,"1":192,"2":225,"3":147,"4":80,"5":140,"6":142,"7":239,"8":1,"9":113,"10":158,"11":156,"12":148,"13":127,"14":139,"15":149,"16":57,"17":187,"18":111,"19":218,"20":74,"21":1,"22":1,"23":210,"24":209,"25":179,"26":229,"27":40,"28":174,"29":176,"30":186,"31":125,"32":0,"33":0,"34":0,"35":0,"36":0,"37":0,"38":0,"39":0,"40":2,"41":0,"42":0,"43":0,"44":0,"45":0,"46":0,"47":0,"48":0,"49":0,"50":0,"51":0,"52":0,"53":0,"54":0,"55":0,"56":0,"57":0,"58":0,"59":0,"60":0,"61":0,"62":0,"63":0,"64":0,"65":0,"66":0,"67":0,"68":0,"69":0,"70":0,"71":0,"72":1,"73":4,"74":99,"75":111,"76":105,"77":110,"78":8,"79":116,"80":114,"81":97,"82":110,"83":115,"84":102,"85":101,"86":114,"87":1,"88":7,"89":0,"90":0,"91":0,"92":0,"93":0,"94":0,"95":0,"96":0,"97":0,"98":0,"99":0,"100":0,"101":0,"102":0,"103":0,"104":0,"105":0,"106":0,"107":0,"108":0,"109":0,"110":0,"111":0,"112":0,"113":0,"114":0,"115":0,"116":0,"117":0,"118":0,"119":0,"120":1,"121":10,"122":97,"123":112,"124":116,"125":111,"126":115,"127":95,"128":99,"129":111,"130":105,"131":110,"132":9,"133":65,"134":112,"135":116,"136":111,"137":115,"138":67,"139":111,"140":105,"141":110,"142":0,"143":2,"144":32,"145":255,"146":192,"147":225,"148":147,"149":80,"150":140,"151":142,"152":239,"153":1,"154":113,"155":158,"156":156,"157":148,"158":127,"159":139,"160":149,"161":57,"162":187,"163":111,"164":218,"165":74,"166":1,"167":1,"168":210,"169":209,"170":179,"171":229,"172":40,"173":174,"174":176,"175":186,"176":125,"177":8,"178":232,"179":3,"180":0,"181":0,"182":0,"183":0,"184":0,"185":0,"186":208,"187":7,"188":0,"189":0,"190":0,"191":0,"192":0,"193":0,"194":1,"195":0,"196":0,"197":0,"198":0,"199":0,"200":0,"201":0,"202":161,"203":146,"204":65,"205":99,"206":0,"207":0,"208":0,"209":0,"210":33,"211":0,"212":32,"213":23,"214":218,"215":90,"216":139,"217":159,"218":18,"219":107,"220":209,"221":126,"222":250,"223":86,"224":119,"225":50,"226":146,"227":112,"228":136,"229":232,"230":10,"231":11,"232":206,"233":123,"234":97,"235":186,"236":177,"237":6,"238":131,"239":163,"240":111,"241":248,"242":62,"243":227,"244":203,"245":64,"246":108,"247":216,"248":255,"249":193,"250":94,"251":148,"252":112,"253":118,"254":26,"255":239,"256":242,"257":178,"258":204,"259":101,"260":244,"261":137,"262":17,"263":222,"264":69,"265":56,"266":158,"267":193,"268":129,"269":62,"270":254,"271":24,"272":91,"273":201,"274":15,"275":106,"276":236,"277":92,"278":125,"279":196,"280":85,"281":10,"282":142,"283":213,"284":22,"285":152,"286":212,"287":151,"288":0,"289":130,"290":105,"291":76,"292":135,"293":254,"294":124,"295":55,"296":10,"297":86,"298":218,"299":4,"300":183,"301":189,"302":173,"303":68,"304":144,"305":27,"306":102,"307":52,"308":72,"309":0}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// async function signTransaction(payload) {
+//   const utils = {
+//     normlize: (s) => s.replace(/^0[xX]0*/g, "0x"),
+//     bcsToBytes(value) {
+//       const serializer = new Serializer();
+//       value.serialize(serializer);
+//       return serializer.getBytes();
+//     },
+//     getParams(func, ty_tags, args) {
+//       func = utils.normlize(func);
+//       const funcNameParts = func.split("::");
+//       const [addr, module] = func.split("::");
+//       return {
+//         funcNameParts,
+//         addr,
+//         module,
+//         func,
+//       };
+//     },
+//   };
+
+//   //接口参数
+//   async function fetchABI(addr) {
+//     const modules = await client.getAccountModules(addr);
+//     const abis = modules
+//       .map((module) => module.abi)
+//       .flatMap((abi) =>
+//         abi.exposed_functions
+//           .filter((ef) => ef.is_entry)
+//           .map((ef) => ({
+//             fullName: `${abi.address}::${abi.name}::${ef.name}`,
+//             ...ef,
+//           }))
+//       );
+
+//     const abiMap = new Map();
+//     abis.forEach((abi) => {
+//       abiMap.set(abi.fullName, abi);
+//     });
+
+//     return abiMap;
+//   }
+
+//   if (payload?.sequence_number) {
+//     config.sequenceNumber = options.sequence_number;
+//   }
+
+//   if (payload?.gas_unit_price) {
+//     config.gasUnitPrice = options.gas_unit_price;
+//   }
+
+//   if (payload?.max_gas_amount) {
+//     config.maxGasAmount = options.max_gas_amount;
+//   }
+
+//   if (payload?.expiration_timestamp_secs) {
+//     const timestamp = Number.parseInt(options.expiration_timestamp_secs, 10);
+//     config.expSecFromNow = timestamp - Math.floor(Date.now() / 1000);
+//   }
+
+//   const params = utils.getParams(payload.function, payload.type_arguments, payload.arguments);
+//   const abiMap = await fetchABI(params.addr);
+//   const funcAbi = abiMap.get(params.func);
+//   // Remove all `signer` and `&signer` from argument list because the Move VM injects those arguments. Clients do not
+//   // need to care about those args. `signer` and `&signer` are required be in the front of the argument list. But we
+//   // just loop through all arguments and filter out `signer` and `&signer`.
+//   const originalArgs = funcAbi.params.filter((param) => param !== "signer" && param !== "&signer");
+//   // Convert string arguments to TypeArgumentABI
+//   const typeArgABIs = originalArgs.map((arg, i) => new ArgumentABI(`var${i}`, new TypeTagParser(arg).parseTypeTag()));
+//   const entryFunctionABI = new EntryFunctionABI(
+//     funcAbi.name,
+//     ModuleId.fromStr(`${params.addr}::${params.module}`),
+//     "", // Doc string
+//     funcAbi.generic_type_params.map((_, i) => new TypeArgumentABI(`${i}`)),
+//     typeArgABIs
+//   );
+
+//   const senderAddress = payload.sender instanceof AccountAddress ? HexString.fromUint8Array(payload.sender) : payload.sender;
+
+//   const [{ sequence_number }, chainId] = await Promise.all([client.getAccount(senderAddress), client.getChainId()]);
+
+//   const builderABI = TransactionBuilderABI([utils.bcsToBytes(entryFunctionABI)], {
+//     sender,
+//     sequenceNumber: sequence_number,
+//     chainId,
+//     ...payload,
+//   });
+//   const r = await builderABI.build(params.func, payload.type_arguments, payload.arguments);
+
+//   return r;
+// }

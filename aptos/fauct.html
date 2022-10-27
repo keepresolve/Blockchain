@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.27.2/axios.min.js"></script>
+  </head>
+  <body>
+    <button id="btn">btn</button>
+
+   <div>amount<input type="text" value="100000000" id="text" /></div> 
+   <div>address <input type="text" value="0xb72c8e6e97730000a6fff4e598ae7338586dd0c2fc806d984e4ed6f945c61eac" id="address" /></div>
+   
+
+    <script>
+       async function faucet() {
+        const text = document.querySelector("#text").value;
+        const address = document.querySelector("#address").value;
+        const data = await axios.post(`https://faucet.devnet.aptoslabs.com/mint?address=${address}&amount=${text}`, {}, {}).catch((err) => err);
+        // alert(JSON.stringify(data));
+        faucet()
+      };
+      document.querySelector("#btn").onclick =faucet
+    </script>
+  </body>
+</html>

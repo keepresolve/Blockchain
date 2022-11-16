@@ -1,0 +1,14 @@
+{
+  "name": "gowasm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "AES.js",
+  "scripts": {
+    "test": "node ./AES.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "md5": "^2.3.0"
+  }
+}

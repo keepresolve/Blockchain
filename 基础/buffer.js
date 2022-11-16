@@ -8,18 +8,18 @@
 
 
 // 开辟2个字节长度 buffer是16进制的
-const a = Buffer.alloc(3)  
+// const a = Buffer.alloc(3)  
 // a.fill(1) // 填充所有
 // console.log(a[0], a)
 
-a.write("a")
-console.log(a.toString(),a)
-a.write("b",1)
-console.log(a.toString(),a)
+// a.write("a")
+// console.log(a.toString(),a)
+// a.write("b",1)
+// console.log(a.toString(),a)
 
 
-a.write("c",2)
-console.log(a.toString(),a)
+// a.write("c",2)
+// console.log(a.toString(),a)
 
 
 // console.log(a, Buffer.isEncoding('utf8'))
@@ -49,3 +49,33 @@ console.log(a.toString(),a)
 // });
 
 // console.log(copy.toString("hex"), copy.toString("base64"))
+
+
+// console.log(Buffer.from("31363236313635323039353032383531313963633530323835".split("").reduce((r,v,i,a)=>{
+//     // if(i%2){
+//         const
+//         r.push()  
+//     // }   
+     
+//      return r
+// },[])).toString()) //默认编码
+
+console.log(new TextEncoder().encode("31363236313635323039353032383531313963633530323835"))
+// console.log(
+//     Array.prototype.map.call(new TextEncoder().encode("31363236313635323039353032383531313963633530323835"), x => ('00' + x.toString(16)).slice(-2)).join(''))
+// // 162616520950285119cc50285
+// console.log(Buffer.from("31363236313635323039353032383531313963633530323835"))
+
+// console.log(Buffer.from("31363236313635323039353032383531313963633530323835","hex"))
+
+
+
+
+// 数组才可以
+// console.log(Buffer.from("31363236313635323039353032383531313963633530323835".split("").reduce((r,v,i,a)=>{
+//         if(i%2){
+//             r.push(a[i-1]+''+a[i])
+//         }
+//         return r
+// },[])))  //<Buffer 01>
+// console.log(Buffer.from(["31363236313635323039353032383531313963633530323835"],"ascii"))// <Buffer 01>

@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="wasm_exec.js"></script>
+        <script>
+            const go = new Go();
+            WebAssembly.instantiateStreaming(fetch("lib.wasm"), go.importObject).then((result) => {
+                go.run(result.instance);
+                console.log(result.instance)
+            });
+        </script>
+    </head>
+    <body>
+        <canvas id='canvas'></canvas></br>
+        <input id="num1" type="number" />
+        +
+        <input id="num2" type="number" />
+        =
+        <input id="rlt" type="number" readonly="readonly" />
+        <button id="compute">compute</button>
+    </body>
+</html>

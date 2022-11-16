@@ -101,3 +101,9 @@ TRON波长
 # 
 视频 https://www.bilibili.com/video/av550704547
 https://www.bilibili.com/video/BV1BG4y1v7rE/?spm_id_from=pageDriver&vd_source=f19b5eb763cc193bcf7fe821980bbc13
+
+
+
+# Tools
+  https://cointool.app/batchMint/xen
+# 

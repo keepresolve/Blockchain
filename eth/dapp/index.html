@@ -65,7 +65,7 @@
         <br />
         128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
         <br />
-        3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", // ropsten测试合约地址
+        3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", 0x2417860dEbAFe9Fc08027D309145590e9574232F  // ropsten测试合约地址
         <br />
       </div>
       批量转账合约contract：<input id="mltcontract" value="0x6f7b49ea570a9aeb19d95dda6268fb35263561c2" type="text" /> 代币contract：<input id="mltTokencontract" value="0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d" type="text" />
@@ -182,17 +182,17 @@
           }
         }
         isInstall() {
-          return !!window.ethereum;
+          return !!this.provider
         }
 
    
         async switchChain(chainId) {
           chainId = transfer16(chainId);
           try {
-            await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
+            await  this.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
           } catch (error) {
             console.log("wallet_addEthereumChain",error.code, error)
-            await ethereum.request({
+            await this.provider.request({
               method: "wallet_addEthereumChain",
               params: [
                   {
@@ -218,7 +218,7 @@
             console.log(error);
           }
 
-          this.web3 = new Web3(ethereum);
+          this.web3 = new Web3(this.provider);
           const [address] = await this.web3.eth.getAccounts();
           const chainId = await this.web3.eth.getChainId();
 
@@ -400,7 +400,7 @@
           const resultData = await MultContract.methods.multisendToken(data.contract || "0x000000000000000000000000000000000000bEEF", addresses, amounts).encodeABI();
 
           const tranferData = {
-            from: window.ethereum.selectedAddress,
+            from: this.provider.selectedAddress,
             to: data.mltcontract || this._config.multSendCotract, //(可选）交易消息的目标地址，如果是合约创建，则不填.
             value: String(data.contract ? 0 : allAmount),
             data: resultData,

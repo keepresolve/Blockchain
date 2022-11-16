@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="wasm_exec.js"></script>
+        <script>
+            const go = new Go();
+            WebAssembly.instantiateStreaming(fetch("eth.wasm"), go.importObject).then((result) => {
+        
+                  go.run(result.instance);
+
+                  
+                  document.querySelector("#btn").onclick=async function(){
+
+			        var decodeData = decodeTest('KEY_HERE', new Uint8Array(await fetch("https://cdn.bitkeep.vip/u_b_69b66a00-a046-11ec-a3eb-f758fa002ae8.png").then(res=>res.arrayBuffer())));
+      
+                    document.querySelector("#pre").innerHTML = decodeData
+                    document.getElementById("decodeJavaImage").src = URL.createObjectURL(
+				        new Blob([decodeData], { type: 'image/png' })
+			        );
+                  }
+                //   document.
+                
+                
+            });
+        </script>
+    </head>
+    <body>
+        <button id="btn">Cropto</button>
+        <pre id="pre"></pre>
+        <img id="decodeJavaImage"/>
+    </body>
+    <script>
+        
+    </script>
+</html>

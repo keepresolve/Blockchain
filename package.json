@@ -1,6 +1,11 @@
 {
   "dependencies": {
+    "@metamask/eth-sig-util": "^5.0.2",
+    "@mysten/wallet-adapter-react": "^7.0.0",
+    "@suiet/wallet-adapter": "^0.0.18",
+    "crypto-js": "^4.1.1",
     "elliptic": "^6.5.4",
+    "eth-sig-util": "^3.0.1",
     "geoip-lite": "^1.4.5"
   }
 }

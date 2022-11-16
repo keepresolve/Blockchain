@@ -1,0 +1,14 @@
+{
+  "name": "atom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "cosmo-wallet-tool": "0.0.44"
+  }
+}

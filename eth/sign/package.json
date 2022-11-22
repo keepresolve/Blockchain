@@ -1,0 +1,15 @@
+{
+  "name": "sign",
+  "version": "1.0.0",
+  "description": "",
+  "main": "encryptedData.js",
+  "scripts": {
+    "test": "node ./recover.js"
+  },
+  "author": "caoshiyuan",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^5.7.2",
+    "siwe": "^1.1.6"
+  }
+}

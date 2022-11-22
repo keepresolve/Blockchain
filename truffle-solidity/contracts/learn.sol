@@ -12,11 +12,11 @@ contract SimpleStorage {
 
 
 
-    function set(uint  x) public {
+    function setabcdefe(uint  x) public {
         storedData = x;
     }
 
-    function get() public view returns (uint) {
+    function getabcdefe() public view returns (uint) {
         return storedData;
     }
 

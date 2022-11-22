@@ -1,32 +1,94 @@
- <!DOCTYPE html>
- <html lang="en">
- <head>
-     <meta charset="UTF-8">
-     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Document</title>
-     <script src="https://cdn.bootcdn.net/ajax/libs/ethers/6.0.0-beta.9/ethers.js"></script>
- </head>
- <body>
-     <script type="module">
-         import  ethers  from "https://cdn.bootcdn.net/ajax/libs/ethers/5.6.6/ethers.umd.js"
-         async function init () {
-            await ethereum.enable()
-            const Wallet = new ethers.providers.Web3Provider(web3.currentProvider);
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/ethers/5.7.2/ethers.esm.min.js"></script> -->
+  </head>
+  <body>
+    <script type="module">
+       import  * as ethers   from "https://cdn.bootcdn.net/ajax/libs/ethers/5.7.2/ethers.esm.js"
+       console.log("aas____",ethers)
+      //  async function init () {
+      //     await ethereum.enable()
+      //     const Wallet = new ethers.providers.Web3Provider(web3.currentProvider);
 
-            Wallet
-         }
-         init()
-         console.log(ethers)
-          // var sig = "0xf8ab2d8459682f0083061a8094a71edc38d189767582c38a3145b5873052c3e47a80b844a9059cbb000000000000000000000000e94fc2e39e1614147b1b12dba9f987b69485abeb000000000000000000000000000000000000000000000001a055690d9db80000820124a0621ecb7ac7340a683914a19c97f61fd6b46009ff25dec2c1be2295bc92c0e99ca05a6895146d4a058d620b05bcd87ff4480628ef1d5ec1d095c43e87f5daf10b6d";
-        // var s = ethers.Wallet.parseTransaction(sig);
-        // console.log(s);
-        // console.log('gasPrice:' + parseFloat(s.gasPrice));
-        // console.log('gasLimit:' + parseFloat(s.gasLimit));
-        // console.log('value:' + parseFloat(s.value));
-         
-         
-     </script>
-     
- </body>
- </html>
+      //     Wallet
+      //  }
+      //  init()
+      //  console.log)
+
+      const params = {
+        types: {
+          EIP712Domain: [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" },
+          ],
+          OrderComponents: [
+            { name: "offerer", type: "address" },
+            { name: "zone", type: "address" },
+            { name: "offer", type: "OfferItem[]" },
+            { name: "consideration", type: "ConsiderationItem[]" },
+            { name: "orderType", type: "uint8" },
+            { name: "startTime", type: "uint256" },
+            { name: "endTime", type: "uint256" },
+            { name: "zoneHash", type: "bytes32" },
+            { name: "salt", type: "uint256" },
+            { name: "conduitKey", type: "bytes32" },
+            { name: "counter", type: "uint256" },
+          ],
+          OfferItem: [
+            { name: "itemType", type: "uint8" },
+            { name: "token", type: "address" },
+            { name: "identifierOrCriteria", type: "uint256" },
+            { name: "startAmount", type: "uint256" },
+            { name: "endAmount", type: "uint256" },
+          ],
+          ConsiderationItem: [
+            { name: "itemType", type: "uint8" },
+            { name: "token", type: "address" },
+            { name: "identifierOrCriteria", type: "uint256" },
+            { name: "startAmount", type: "uint256" },
+            { name: "endAmount", type: "uint256" },
+            { name: "recipient", type: "address" },
+          ],
+        },
+        // primaryType: "OrderComponents",
+        domain: { name: "Seaport", version: "1.1", chainId: "137", verifyingContract: "0x00000000006c3852cbEf3e08E8dF289169EdE581" },
+        message: {
+          offerer: "0xEfD6Ea65D774fFd95068CCFC8c365b2aab26f9c0",
+          offer: [{ itemType: "3", token: "0xba6666B118f8303F990f3519DF07e160227cCE87", identifierOrCriteria: "7", startAmount: "1", endAmount: "1" }],
+          consideration: [
+            { itemType: "1", token: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", identifierOrCriteria: "0", startAmount: "103703600000000000000000", endAmount: "103703600000000000000000", recipient: "0xEfD6Ea65D774fFd95068CCFC8c365b2aab26f9c0" },
+            { itemType: "1", token: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", identifierOrCriteria: "0", startAmount: "2802800000000000000000", endAmount: "2802800000000000000000", recipient: "0x0000a26b00c1F0DF003000390027140000fAa719" },
+            { itemType: "1", token: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619", identifierOrCriteria: "0", startAmount: "5605600000000000000000", endAmount: "5605600000000000000000", recipient: "0xb17e8166e683b592e32F46E27d2e093E8D4622A7" },
+          ],
+          startTime: "1669007786",
+          endTime: "1671599786",
+          orderType: "1",
+          zone: "0x0000000000000000000000000000000000000000",
+          zoneHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          salt: "24446860302761739304752683030156737591518664810215442929818515809849207498072",
+          conduitKey: "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000",
+          totalOriginalConsiderationItems: "3",
+          counter: "0",
+        },
+      };
+
+      let wallet = new ethers.Wallet("0xa0ec90b87ac3c654bb26ffe220eddca15d764f464de93c958089b7c369beca20");
+
+      const signature = await wallet._signTypedData(params.domain, params.types, params.message);
+      console.log(signature);
+      // var sig = "0xf8ab2d8459682f0083061a8094a71edc38d189767582c38a3145b5873052c3e47a80b844a9059cbb000000000000000000000000e94fc2e39e1614147b1b12dba9f987b69485abeb000000000000000000000000000000000000000000000001a055690d9db80000820124a0621ecb7ac7340a683914a19c97f61fd6b46009ff25dec2c1be2295bc92c0e99ca05a6895146d4a058d620b05bcd87ff4480628ef1d5ec1d095c43e87f5daf10b6d";
+      // var s = ethers.Wallet.parseTransaction(sig);
+      // console.log(s);
+      // console.log('gasPrice:' + parseFloat(s.gasPrice));
+      // console.log('gasLimit:' + parseFloat(s.gasLimit));
+      // console.log('value:' + parseFloat(s.value));
+    </script>
+  </body>
+</html>

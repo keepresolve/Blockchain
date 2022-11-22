@@ -6,8 +6,6 @@
     "@mui/material": "^5.10.13",
     "@mysten/wallet-adapter-all-wallets": "^0.3.1",
     "@mysten/wallet-adapter-react": "^7.0.0",
-    "@mysten/wallet-adapter-react-ui": "^0.2.4",
-    "@suiet/wallet-adapter": "^0.0.18",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

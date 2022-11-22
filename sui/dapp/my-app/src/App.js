@@ -4,30 +4,34 @@ import {  useMemo } from "react";
 // import { useWallet } from "@mysten/wallet-adapter-react";
 
 import { WalletProvider } from "@mysten/wallet-adapter-react";
-import { WalletStandardAdapterProvider, UnsafeBurnerWalletAdapter } from "@mysten/wallet-adapter-all-wallets";
-import { WalletWrapper } from "@mysten/wallet-adapter-react-ui";
-import { TestButton } from "./TestButton";
+import { WalletStandardAdapterProvider } from "@mysten/wallet-adapter-all-wallets";
 
+import { TestButton } from "./TestButton";
+import { TestAccount } from "./TestAccount";
+import { Testwallet } from "./TestWallets";
+
+import BitKeepWallet from "./SuiWallet"
 import "./index.css";
 
 function App() {
   const adapters = useMemo(
     () => [
-      new WalletStandardAdapterProvider(),
-      new UnsafeBurnerWalletAdapter(),
+      new WalletStandardAdapterProvider()
     ],
     []
   );
 
 
-
-
   return (
     <div className="App">
+        
        <WalletProvider adapters={adapters}>
+          <Testwallet/>
+          <TestAccount/>
           <TestButton />
-          <WalletWrapper />
         </WalletProvider>
+
+        <BitKeepWallet/>
     </div>
   );
 }

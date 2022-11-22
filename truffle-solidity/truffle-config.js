@@ -78,7 +78,7 @@ module.exports = {
       skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
     Heco: {
-      provider: () => new HDWalletProvider("助记词或者私钥地址", `https://ropsten.infura.io/v3/自己申请的projectId`),  // 申请地址 https://infura.io/dashboard
+      provider: () => new HDWalletProvider("助记词或者私钥地址", `https://http-mainnet.hecochain.com`),  // 申请地址 https://infura.io/dashboard
       network_id: 128, // Ropsten's id
       gas: 5500000, // Ropsten has a lower block limit than mainnet
       confirmations: 2, // # of confs to wait between deployments. (default: 0)

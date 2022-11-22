@@ -1,32 +1,65 @@
 window.DemoAbi = [
   {
-    constant: false,
-    inputs: [
+    "inputs": [
       {
-        internalType: "uint256",
-        name: "x",
-        type: "uint256",
-      },
+        "internalType": "uint256",
+        "name": "x",
+        "type": "uint256"
+      }
     ],
-    name: "set",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
+    "name": "setabcdefe",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    constant: true,
-    inputs: [],
-    name: "get",
-    outputs: [
+    "inputs": [],
+    "name": "getabcdefe",
+    "outputs": [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
   },
-];
+  {
+    "inputs": [],
+    "name": "setGoStraight",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getChoice",
+    "outputs": [
+      {
+        "internalType": "enum SimpleStorage.ActionChoices",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getDefaultChoice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function",
+    "constant": true
+  }
+]
+

@@ -6,7 +6,7 @@ import React from "react";
 import { useWallet } from "@mysten/wallet-adapter-react";
 
 export function TestButton() {
-  let { connected, getAccounts, signAndExecuteTransaction } = useWallet();
+  let { connected, getAccounts, signAndExecuteTransaction} = useWallet();
 
   const handleClick = async () => {
     getAccounts().then((accounts) => {

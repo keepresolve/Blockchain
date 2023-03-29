@@ -52,6 +52,15 @@
           <textarea name="" id="transaction_result" cols="60" rows="15"></textarea>
           <button data-method="transaction_send">广播</button>
         </div>
+
+        <div class="flex-item">
+          <h1>查询交易hash</h1>
+          <input type="text" id="transaction_search_rpc" value="https://data-seed-prebsc-1-s1.binance.org:8545" />
+          <input type="text" id="transaction_search_params" width="400px" value="" />
+          <!-- chainId:<span id="chainId">97</span> -->
+          <textarea name="" id="transaction_search_result" cols="60" rows="15"></textarea>
+          <button data-method="transaction_search">查询交易hash</button>
+        </div>
     </div>
     <h4 class="dotte"></h4>
     <h1>Dapp</h1>
@@ -97,6 +106,8 @@
         128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
         <br />
         3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", 0x2417860dEbAFe9Fc08027D309145590e9574232F // ropsten测试合约地址
+
+        testbsc 0x7Ddf5805B5a73c3D065Dd122341B0f198719507B
         <br />
       </div>
       批量转账合约contract：<input id="mltcontract" value="0x6f7b49ea570a9aeb19d95dda6268fb35263561c2" type="text" /> 代币contract：<input id="mltTokencontract" value="0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d" type="text" />
@@ -554,6 +565,36 @@
                         parseTransaction_result.value = typeof result =='string' ? result :  JSON.stringify(result,null,2)
                       }
 
+                      break;
+
+
+                      case "transaction_search":
+                      if (true) {
+                        const transaction_result = document.querySelector("#transaction_search_result")
+                        const transaction_txid = document.querySelector("#transaction_search_params")
+                        const transaction_rpc = document.querySelector("#transaction_search_rpc")
+                        const result  = await fetch(transaction_rpc.value, {
+                          method: "POST",
+                          headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                          },
+                          // mode:"cors",
+                          body: JSON.stringify(
+                            {
+                                "jsonrpc": "2.0",
+                                "method": "eth_getTransactionByHash",
+                                "params": [ transaction_txid.value],
+                                "id": 0
+                            }
+                          ),
+                        })
+                          .then((response) => response.json())
+                          .catch((error) => {
+                             return error
+                          });
+                          transaction_result.value = typeof result=='object' ?  JSON.stringify(result, null,2) : result
+                      }
                       break;
                   }
                 };

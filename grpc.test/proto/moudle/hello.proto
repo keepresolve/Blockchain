@@ -1,0 +1,24 @@
+syntax="proto3";  // 标识，必须要有，表示是在使用proto3的协议
+
+package hello;  // 包名，必须要有，可以理解为这个协议的命名空间
+
+// 定义一个服务Greeter
+// 其中有个rpc方法叫做 SayHello
+// 同时我们可以看到传参为HelloRequest，HelloRequest属于消息
+// 返回消息Greeter
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+// 对于消息的定义
+// 在nodejs里面，消息所定义的参数是存在一个数组里面的
+// 所以定义的时候，需要给出参数的位置是比较科学的
+// 注意：目前只针对于nodejs是这样存参数的，至于其他平台语言，不一定是这样的
+message HelloRequest {
+  string message=1;  // 第一个参数类型是string
+  int32 age=2;  // 第二个参数类型是int32
+}
+
+message HelloReply {
+  string message=1;  // 第一个参数类型是string
+}

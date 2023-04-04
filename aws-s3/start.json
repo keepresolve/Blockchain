@@ -1,0 +1,16 @@
+{
+  "apps": [{
+    "name": "aws-s3",
+    "script": "./bin/www",
+    "node_args": "--inspect=0.0.0.0:9999",
+    "watch": false,
+    "log_date_format": "YYYY-MM-DD HH:mm:ss",
+    "env": {
+      "//AWS_ACCESS_KEY_ID": "AKIAZ3S2RTKAXCBVB4VE",
+      "//AWS_SECRET_ACCESS_KEY": "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",
+      "AWS_SESSION_TOKEN（可选": "",
+      "REGION": "ap-northeast-1",
+      "BUCKET": "caoshiyuan-aws"
+    }
+  }]
+}

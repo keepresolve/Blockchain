@@ -1,0 +1,80 @@
+<html>
+
+<head>
+<style>
+    #result .file{
+        display: flex;
+    }
+    #result img{
+        width: 100px;
+    }
+</style>
+</head>
+
+<body>
+    <div class="hei-bg" style="display:block;">
+        <div class="user-info" style="display:block;">
+            <input id="uppic" type="file" multiple>
+            <div>
+                <input id="checkbox" type="checkbox" checked="true" /> v3
+            </div>
+            <div>
+                <input type="button" value="确定" id="userbtn"  class="bg-main tc userbtn">
+            </div>
+            <div id="result"></div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script>
+    $(function () {
+        $('#userbtn').on('click', async function () {
+            var isV3 = document.querySelector("#checkbox").checked
+            var d1 = new Date();
+            let file = $("#uppic")[0].files[0]
+
+            var form = new FormData();
+            
+            Array.from($("#uppic")[0].files).map(v=>{
+                 form.append(v.name, v); //slice方法用于切出文件的一部分
+            })
+        
+            $.ajax({
+                url:  isV3 ? "/uploadv3" : "/uploadv2",
+                type: "POST",
+                data: form,
+                timeout: 120 * 1000,
+                async: false, //同步
+                processData: false,
+                contentType: false, 
+                progress(){
+                    console.log(...arguments)
+                },
+                success: function (data) {
+                    console.log(data)
+                    if(data.status==0){
+                  
+                        const str =  data.results.map(v=>`
+                                <div class='file'> 
+                                    <span>${v.file.nas3_nameme}</span>
+                                    <img src=img/${v.file.s3_name}> 
+                                    <a href=img/${v.file.s3_name}>img/${v.file.s3_name}</a>
+                                </div>
+                        `)
+                        document.querySelector("#result").innerHTML = document.querySelector("#result").innerHTML + str
+                       
+                    }
+
+
+                }
+            });
+
+
+
+
+
+        });
+    });
+</script>
+
+</html>

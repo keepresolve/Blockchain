@@ -427,8 +427,7 @@
                     case 'sendInscription':
                         const sendInscription_result = document.querySelector('#sendInscription_result')
                         const sendInscription_to = document.querySelector('#sendInscription_to').value
-                        const sendInscription_amount = document.querySelector('#sendInscription_amount')
-                            .value
+                        const sendInscription_amount = document.querySelector('#sendInscription_amount').value
                         try {
                             const sendInscription_r = await wallet.sendInscription(sendInscription_to,
                                 sendInscription_amount)

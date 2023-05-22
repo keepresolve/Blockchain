@@ -1,0 +1,22 @@
+{
+  "name": "demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bitcoinjs-lib.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "base64-js": "^1.5.1",
+    "crypto-browserify": "^3.12.0",
+    "ieee754": "^1.2.1",
+    "jquery.json-viewer": "^1.5.0",
+    "stream-browserify": "^3.0.0",
+    "webpack": "^5.83.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.1"
+  }
+}

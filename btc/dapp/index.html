@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/bignumber.js/9.1.1/bignumber.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.6/axios.min.js"></script>
+   
+
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/bitcoinjs-lib/0.2.0/bitcoinjs-min.js"></script> -->
+    <script src="./bitcoinjs-lib.js"></script>
+    <script src="./buffer-bowers.js?123221321"></script>
+    <script src="./json-viewer/jquery.min.js"></script>
+
+    <!-- <script src="./node_modules/jquery.json-viewer/json-viewer/jquery.json-viewer.js"></script>
+    <script src="./node_modules/jquery.json-viewer/json-viewer/jquery.json-viewer.css"></script> -->
+    <link href="./json-viewer/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+    <script src="./json-viewer/jquery.json-viewer.js"></script>
+
+</head>
+<style>
+    .html, body{
+        max-width: 100vw;
+        overflow: auto;
+    }
+    body>div {
+        padding: 10px;
+        margin-top: 10px;
+    }
+</style>
+
+<body>
+    <div id="state">
+        <pre></pre>
+    </div>
+
+    <div id="connect">
+        <span>wallet type</span> <button data-method="wallet_type" data-params="bitkeep">bitkeep</button>
+        <button data-method="connect">connect</button>
+    </div>
+
+    <div id="psbt_transaction">
+        <div><span>to</span> <input type="text" id="signPsbt_to" name=""
+                value="bc1plq462q0rhh0s6jme9sjwp2nmd4pth2z5k5sjyaa6r6af4ar9g88qkrscqd" /></div>
+        <div><span>amount</span> <input type="number" id="signPsbt_amount" value="0.0001" /></div>
+        <div><span>fee</span> <input type="number" id="signPsbt_fee" name="" value="0.0001" /></div>
+        <button data-method="signPsbt">signPsbt</button>
+        <div>
+            <span>signPsbt_result</span>
+            <pre id="signPsbt_result"></pre>
+        </div>
+        <div>
+            <span>signPsbtTxHex_result</span>
+            <pre id="signPsbtTxHex_result"></pre>
+        </div>
+    </div>
+
+    <div id="push_psbt_transaction">
+        <div><span>psbt_hex</span> <input type="text" id="pushPsbt_hex" name="" /></div>
+
+        <button data-method="pushPsbt">pushPsbt</button>
+        <div>
+            <span>pushPsbt_result</span>
+            <div id="pushPsbt_result"></div>
+        </div>
+    </div>
+
+    <div id="sendBitcoin_transaction">
+        <div><span>to</span> <input type="text" id="sendBitcoin_to" name=""
+                value="bc1plq462q0rhh0s6jme9sjwp2nmd4pth2z5k5sjyaa6r6af4ar9g88qkrscqd" /></div>
+        <div><span>satoshi</span> <input type="number" id="sendBitcoin_amount" value="10000" /></div>
+
+        <button data-method="sendBitcoin">sendBitcoin</button>
+        <div>
+            <span>sendBitcoin_result</span>
+            <div id="sendBitcoin_result"></div>
+        </div>
+    </div>
+
+    <div id="signMessage_transaction">
+        <div><span>to</span> <input type="text" id="signMessage_parmas" name="" value="asdasdasdasdsadsada" /></div>
+
+        <button data-method="signMessage">signMessage</button>
+        <div>
+            <span>signMessage_result</span>
+            <div id="signMessage_result"></div>
+        </div>
+    </div>
+
+
+
+    <div id="sendInscription_transaction">
+        <div><span>to</span> <input type="text" id="sendInscription_to" name=""
+                value="bc1plq462q0rhh0s6jme9sjwp2nmd4pth2z5k5sjyaa6r6af4ar9g88qkrscqd" /></div>
+        <div><span>InscriptionId</span> <input type="number" id="sendInscription_amount" value="" /></div>
+
+        <button data-method="sendInscription">sendInscription</button>
+        <div>
+            <span>sendInscription_result</span>
+            <div id="sendInscription_result"></div>
+        </div>
+    </div>
+
+    <div id="getInscriptions">
+        <button data-method="getInscriptions">getInscriptions</button>
+        <div>
+            <span>getInscriptions_result</span>
+            <div id="getInscriptions_result"></div>
+        </div>
+    </div>
+
+    <script>
+        class EventEmitter {
+            constructor() {
+                this._listeners = {}
+                this.maxListener = 10
+                this.addListener = this.on
+            }
+            on(event, cb) {
+                var listeners = this._listeners
+                // if (listeners[event] && listeners[event].length >= this.maxListener) {
+                //     throw console.error('监听器的最大数量是%d,您已超出限制', this.maxListener)
+                // }
+                if (listeners[event] instanceof Array) {
+                    if (listeners[event].indexOf(cb) === -1) {
+                        listeners[event].push(cb)
+                    }
+                } else {
+                    listeners[event] = [].concat(cb)
+                }
+            }
+
+            emit(event) {
+                var args = Array.prototype.slice.call(arguments)
+                args.shift()
+                if (!this._listeners[event]) return
+                this._listeners[event].forEach(cb => {
+                    cb.apply(null, args)
+                })
+            }
+
+            listeners(event) {
+                return this._listeners[event] || []
+            }
+
+            setMaxListeners(num) {
+                this.maxListener = num
+            }
+
+            removeListener(event, listener) {
+                var listeners = this._listeners
+                var arr = listeners[event] || []
+                var i = arr.indexOf(listener)
+                if (i >= 0) {
+                    listeners[event].splice(i, 1)
+                }
+            }
+            off(event, listener) {
+                var listeners = this._listeners
+                var arr = listeners[event] || []
+                var i = arr.indexOf(listener)
+                if (i >= 0) {
+                    listeners[event].splice(i, 1)
+                }
+            }
+
+            removeAllListener(event) {
+                this._listeners[event] = []
+            }
+
+            removeAllListeners(eventNames = []) {
+                eventNames.forEach(name => delete this._listeners[name])
+            }
+
+            once(event, listener) {
+                var self = this
+
+                function fn() {
+                    var args = Array.prototype.slice.call(arguments)
+                    listener.apply(null, args)
+                    // self.removeListener(event, fn);
+                }
+                this.on(event, fn)
+            }
+        }
+
+        function _observer(obj) {
+            var queueObserver = new Set()
+            return {
+                state: new Proxy(obj, {
+                    set(traget, key, value, target) {
+                        var result = Reflect.set(...arguments)
+                        queueObserver.forEach(fn => fn(traget, obj))
+                        return result
+                    }
+                }),
+                subscribe(fn) {
+                    queueObserver.add(fn)
+                }
+            }
+        }
+
+        class Wallet extends EventEmitter {
+            constructor() {
+                super()
+                const {
+                    state,
+                    subscribe
+                } = _observer({
+                    address: '',
+                    publicKey: '',
+                    type:  localStorage.getItem("wallet_type") || 'bitkeep'
+                })
+                this.state = state
+                this.emit('stateChanged', this.state)
+                subscribe(() => this.emit('stateChanged', this.state))
+            }
+            hashProvider(){
+                return  window.bitkeep && window.bitkeep.unisat || window.unisat
+            }
+            getProvider() {
+                let provider
+                let isBitkeep = this.state.type == 'bitkeep'
+                if (isBitkeep) {
+                    provider = window.bitkeep && window.bitkeep.unisat
+                } else {
+                    provider = window.unisat
+                }
+                if (!provider) alert(`please install  ${isBitkeep ? 'Bitkeep Wallet' : 'extension wallet'}`)
+                return provider
+            }
+
+            async connect() {
+                const _this = this
+                const provider = this.getProvider()
+                await provider.requestAccounts()
+                const [address] = await provider.getAccounts()
+                const publicKey = await provider.getPublicKey()
+                this.state.address = address
+                this.state.publicKey = publicKey
+                
+
+                function handerAddress([address]) {
+                    _this.state.address = address
+                }
+
+                provider.removeListener('accountsChanged', handerAddress)
+                provider.on('accountsChanged', handerAddress)
+
+                const result = await provider.getBalance()
+                Object.assign(this.state, result)
+            }
+
+            async signPsbt(to, value, fee) {
+                bitcoin.initEccLib(Buffer.Ecc)
+                const provider = this.getProvider()
+                const Psbt = new bitcoin.Psbt({
+                    network: bitcoin.networks.bitcoin
+                })
+
+                const transaction = {
+                    value: value,
+                    fee: fee,
+                    from: this.state.address,
+                    to: to,
+                    utxos: await getUtxos(this.state.address)
+                }
+
+                const {
+                    inputs,
+                    outputs
+                } = generateInputAndOutput(transaction)
+                Psbt.setVersion(2) // These are defaults. This line is not needed.
+                Psbt.setLocktime(0)
+
+                inputs.forEach((utxo, i) => {
+                    const input = {
+                        hash: utxo.txid,
+                        index: utxo.vout,
+                        witnessUtxo: {
+                            value: utxo.satoshis,
+                            script: Buffer.Buffer.from(utxo.scriptPubKey, 'hex')
+                        }
+                    }
+                    // if(i==0){
+                    //     Object.assign(input,{
+                    //         witnessScript:Buffer.Buffer.from('witnessScript', 'hex'),
+
+                    //     })
+
+                    // }
+
+                    Psbt.addInput(input)
+                })
+
+                outputs.forEach(out => Psbt.addOutput(out))
+                // const witnessData =
+                // const witnessUtxo = {
+                //     script: witnessData,
+                //     value: 0
+                // };
+                // const witnessData = {
+                //     key:Buffer.Buffer.from(inputs[0].scriptPubKey,"hex"),
+                //     value:Buffer.Buffer.from('{"p":"brc-20","op":"mint","tick":"Like","amt":"1"}')
+                // }
+                // Psbt.addUnknownKeyValToInput(0, witnessData);
+
+                console.log({
+                    outputs,
+                    inputs
+                })
+                return await provider.signPsbt(Psbt.toHex())
+            }
+
+            async pushPsbt(psbthex) {
+                const provider = this.getProvider()
+                return provider.pushPsbt(psbthex)
+            }
+
+            async sendBitcoin(to, satoshi) {
+                const provider = this.getProvider()
+                return provider.sendBitcoin(to, satoshi, {})
+            }
+
+            async signMessage(message) {
+                const provider = this.getProvider()
+                return provider.signMessage(message)
+            }
+
+
+            async sendInscription(address, inscriptionId, option) {
+                const provider = this.getProvider()
+                return provider.sendInscription(address, inscriptionId, option)
+            }
+
+            async getInscriptions() {
+                const provider = this.getProvider()
+                return provider.getInscriptions(0,100)
+            }
+        }
+
+        const stateDom = document.querySelector('#state pre')
+        const connectBtn = document.querySelector('#connect button')
+
+        const wallet = new Wallet()
+    
+        window.onload=wallet.connect.bind(wallet)
+        window.addEventListener("unisat#initialized", wallet.connect.bind(wallet))
+      
+
+        const btnsMethods = Array.from(document.querySelectorAll('button[data-method]'))
+        btnsMethods.forEach(el => {
+            el.onclick = async function (event) {
+                const selectedDom = event.target
+                const {
+                    method,
+                    params
+                } = selectedDom.dataset
+                switch (method) {
+                    case 'connect':
+                    case 'wallet_type':
+                        if (method == 'wallet_type') {
+                            const type = params == 'bitkeep' ? 'injected' : 'bitkeep'
+                            wallet.state.type = selectedDom.innerText = selectedDom.dataset.params =
+                                type
+                        } else {
+                            wallet.connect()
+                        }
+                        break
+
+                    case 'signPsbt':
+                        const signPsbt_result = document.querySelector('#signPsbt_result')
+                        const signPsbt_fee = document.querySelector('#signPsbt_fee').value
+                        const signPsbt_to = document.querySelector('#signPsbt_to').value
+                        const signPsbt_amount = document.querySelector('#signPsbt_amount').value
+
+                        const signPsbt_r = await wallet.signPsbt(signPsbt_to, signPsbt_amount,
+                            signPsbt_fee)
+                        signPsbt_result.innerHTML = JSON.stringify(signPsbt_r, null, 2)
+                        signPsbtTxHex_result.innerHTML = JSON.stringify(bitcoin.transaction, null, 2)
+
+                        break
+
+                    case 'pushPsbt':
+                        const pushPsbt_result = document.querySelector('#pushPsbt_result')
+                        const pushPsbt_hex = document.querySelector('#pushPsbt_hex').value
+                        try {
+                            const pushPsbt_r = await wallet.pushPsbt(pushPsbt_hex)
+                            pushPsbt_result.innerHTML =
+                                `<a href="https://mempool.space/tx${pushPsbt_r}">${pushPsbt_r}</a>`
+                        } catch (error) {
+                            console.error(error)
+                            alert(JSON.stringify(error))
+                        }
+                        break
+
+                    case 'sendBitcoin':
+                        const sendBitcoin_result = document.querySelector('#sendBitcoin_result')
+                        const sendBitcoin_to = document.querySelector('#sendBitcoin_to').value
+                        const sendBitcoin_amount = document.querySelector('#sendBitcoin_amount').value
+                        try {
+                            const sendBitcoin_r = await wallet.sendBitcoin(sendBitcoin_to,
+                                sendBitcoin_amount)
+                            sendBitcoin_result.innerHTML =
+                                `<a href="https://mempool.space/tx${sendBitcoin_r}">${sendBitcoin_r}</a>`
+                        } catch (error) {
+                            console.error(error)
+                            alert(JSON.stringify(error))
+                        }
+                        break
+
+                    case 'signMessage':
+                        const signMessage_result = document.querySelector('#signMessage_result')
+                        const signMessage_parmas = document.querySelector('#signMessage_parmas').value
+                        try {
+                            const signMessage_r = await wallet.signMessage(signMessage_parmas)
+                            signMessage_result.innerHTML = signMessage_r
+                        } catch (error) {
+                            console.error(error)
+                            alert(JSON.stringify(error))
+                        }
+                        break
+
+                    case 'sendInscription':
+                        const sendInscription_result = document.querySelector('#sendInscription_result')
+                        const sendInscription_to = document.querySelector('#sendInscription_to').value
+                        const sendInscription_amount = document.querySelector('#sendInscription_amount')
+                            .value
+                        try {
+                            const sendInscription_r = await wallet.sendInscription(sendInscription_to,
+                                sendInscription_amount)
+                            sendInscription_result.innerHTML =
+                                `<a href="https://mempool.space/tx${sendInscription_r}">${sendInscription_r}</a>`
+                        } catch (error) {
+                            console.error(error)
+                            alert(JSON.stringify(error))
+                        }
+                        break
+
+
+                    case 'getInscriptions':
+                        const getInscriptions_result = document.querySelector('#getInscriptions_result')
+                        try {
+                            const getInscriptions_r = await wallet.getInscriptions()
+                           
+                            $('#getInscriptions_result').jsonViewer(getInscriptions_r);
+
+                        } catch (error) {
+                            console.error(error)
+                            alert(JSON.stringify(error))
+                        }
+                        break
+                }
+            }
+        })
+
+
+
+        wallet.on('stateChanged', function (state) {
+            $('#state pre').jsonViewer(state);
+
+            localStorage.setItem("wallet_type",state.type )
+            connectBtn.dataset.params = state.type
+            connectBtn.innerText = state.type
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        async function getUtxos(address) {
+            const r = await axios.get(
+                    `https://api.blockcypher.com/v1/btc/main/addrs/${address}?unspentOnly=true&includeScript=true`)
+                .catch(err => {
+                    console.log('err', err)
+                    return ''
+                })
+            const result = r.data.txrefs ?
+                r.data.txrefs.map(it => {
+                    return {
+                        address: address,
+                        txid: it.tx_hash,
+                        vout: it.tx_output_n,
+                        scriptPubKey: it.script,
+                        amount: it.value / 10 ** 8,
+                        satoshis: it.value,
+                        height: it.block_height,
+                        confirmations: it.confirmations
+                    }
+                }) : []
+            return result
+        }
+
+        function generateInputAndOutput(transaction) {
+            const amount = BigNumber(transaction.value)
+                .plus(transaction.fee)
+                .multipliedBy(10 ** 8)
+                .toNumber()
+            console.log(amount)
+            const result = transaction.utxos.reduce(
+                (result, it) => {
+                    if (result.enough) return result
+
+                    if (result.value.lt(amount)) {
+                        result.value = result.value.plus(it.satoshis)
+                        result.inputs.push(it)
+                    }
+                    result.enough = result.value.gte(amount)
+
+                    // 计算是否有剩余
+                    if (result.value.minus(amount).gt(0)) {
+                        result.outputs.push({
+                            address: transaction.from,
+                            value: result.value.minus(amount).toNumber()
+                        })
+                    }
+                    return result
+                }, {
+                    inputs: [],
+                    value: BigNumber(0),
+                    enough: false,
+                    fee: BigNumber(transaction.fee)
+                        .multipliedBy(10 ** 8)
+                        .toNumber(),
+                    messaeg: '',
+                    outputs: [{
+                        address: transaction.to,
+                        value: BigNumber(transaction.value)
+                            .multipliedBy(10 ** 8)
+                            .toNumber()
+                    }]
+                }
+            )
+            result.value = BigNumber(result.value).toNumber()
+            if (!result.enough) throw 'Insufficient funds'
+            return result
+        }
+    </script>
+</body>
+
+</html>

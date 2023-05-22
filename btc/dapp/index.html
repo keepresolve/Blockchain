@@ -322,7 +322,7 @@
 
             async sendBitcoin(to, satoshi) {
                 const provider = this.getProvider()
-                return provider.sendBitcoin(to, satoshi, {})
+                return provider.sendBitcoin(to, Number(satoshi), {})
             }
 
             async signMessage(message) {

@@ -2,170 +2,457 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/web3/1.7.1/web3.min.js"></script> -->
-    <!-- <script src="./js/TronWeb.js"></script> -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <!-- <script src="./js/bitkeep.tronWeb.js"></script> -->
+  <script src="./js/vconsole.min.js"></script>
+  <style>
+    body>div {
+      display: flex;
+      flex-direction: column;
+      max-width: 460px;
+      margin-top: 30px;
+    }
 
-    <style>
-        body>div {
-            display: flex;
-            flex-direction: column;
-            max-width: 400px;
-            margin-top: 30px;
-        }
+    input {
+      height: 30px;
+      width: 300px;
+    }
 
-        input {
-            height: 30px;
-        }
-    </style>
+    .status {
+      display: inline-block;
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      background-color: gray;
+    }
+
+    .connected {
+      background-color: green;
+    }
+  </style>
 </head>
 
 <body>
+  <div>
+    <pre id="state"></pre>
+  </div>
+  <div>
+    <h1>链接</h1>
     <div>
-        <h1>链接</h1>
-        <button data-method="connect">connect</button><span id="account">--</span>
-        <span id="balance">0</span>
+      <button data-method="bitkeep">
+        bitkeep
+      </button>
+      <!-- <span class="address"></span> -->
+      <span class="status"></span>
+      <!-- <span class="balance">0</span> -->
     </div>
+
+    <div>
+      <button data-method="tronLink">
+        tronLink
+      </button>
+      <!-- <span class="address"></span> -->
+      <span class="status"></span>
+      <!-- <span class="balance">0</span> -->
+    </div>
+  </div>
+  <div>
     <h1>转账</h1>
-    from:<input id="from" type="text" /> to:<input id="to" type="text" value="TW8u1VSwbXY7o7H9kC8HmCNTiSXvD69Uiw" />
-    amount:<input id="amount" type="number" /> 代币contract：<input id="contract" value="" type="text" />
+
+    from:
+    <input id="from" type="text" />
+    <br />
+    to:
+    <input id="to" type="text" value="TW8u1VSwbXY7o7H9kC8HmCNTiSXvD69Uiw" />
+    <br />
+    amount:
+    <input id="amount" type="number" />
+    <br />
+    代币contract：
+    <input id="contract" value="" type="text" />
+
     <button data-method="sendTransaction">sendTranstion</button>
-    </div>
+  </div>
 
-    <script type="module">
-        function transfer16(val = 0) {
-            val = isNaN(Number(val)) ? 1 : Number(val);
-            return "0x" + val.toString(16);
-        }
-        class Wallet {
-            constructor() {
-                this.state = {
-                    address: "",
-                };
+  <div>
+    <h1>signMessage</h1>
+
+    <input id="message" type="text" />
+
+    <button data-method="signMessage">signMessage</button>
+    <button data-method="signMessageV2">signMessageV2</button>
+    v1<pre id="messagePre"></pre>
+    v2<pre id="messageV2Pre"></pre>
+  </div>
+
+  <script type="module">
+    new VConsole()
+        class EventEmitter {
+          constructor() {
+            this._listeners = {}
+            this.maxListener = 10
+            this.addListener = this.on
+          }
+          on(event, cb) {
+            var listeners = this._listeners
+            // if (listeners[event] && listeners[event].length >= this.maxListener) {
+            //     throw console.error('监听器的最大数量是%d,您已超出限制', this.maxListener)
+            // }
+            if (listeners[event] instanceof Array) {
+              if (listeners[event].indexOf(cb) === -1) {
+                listeners[event].push(cb)
+              }
+            } else {
+              listeners[event] = [].concat(cb)
             }
+          }
 
-            get selectedAddress() {
-                return this.state.address;
+          emit(event) {
+            var args = Array.prototype.slice.call(arguments)
+            args.shift()
+            if (!this._listeners[event]) return
+            this._listeners[event].forEach((cb) => {
+              cb.apply(null, args)
+            })
+          }
+
+          listeners(event) {
+            return this._listeners[event] || []
+          }
+
+          setMaxListeners(num) {
+            this.maxListener = num
+          }
+
+          removeListener(event, listener) {
+            var listeners = this._listeners
+            var arr = listeners[event] || []
+            var i = arr.indexOf(listener)
+            if (i >= 0) {
+              listeners[event].splice(i, 1)
             }
-            set selectedAddress(val) {
-                this.state.address = val;
-                document.querySelector("#account").innerHTML = this.state.address;
-                
+          }
+          off(event, listener) {
+            var listeners = this._listeners
+            var arr = listeners[event] || []
+            var i = arr.indexOf(listener)
+            if (i >= 0) {
+              listeners[event].splice(i, 1)
             }
+          }
 
-            isInstall() {
-                return window.tronLink && window.tronWeb;
+          removeAllListener(event) {
+            this._listeners[event] = []
+          }
+
+          removeAllListeners(eventNames = []) {
+            eventNames.forEach((name) => delete this._listeners[name])
+          }
+
+          once(event, listener) {
+            var self = this
+
+            function fn() {
+              var args = Array.prototype.slice.call(arguments)
+              listener.apply(null, args)
+              // self.removeListener(event, fn);
             }
-
-            async connect() {
-                await tronLink.request({ method: "tron_requestAccounts" });
-                this.selectedAddress = tronWeb.defaultAddress.base58;
-
-                const balance = await tronWeb.trx.getBalance(this.selectedAddress);
-                document.querySelector("#from").value = this.selectedAddress
-                document.querySelector("#balance").innerHTML = balance
-            }
-
-
-            async sendTransaction(data) {
-                // 创建交易
-                if (data.contract) {
-                    let decimal = 18
-                    let Contract = await tronWeb.contract().at(data.contract)
-                    const decimalCall = Contract.decimals || Contract.DECIMALS;
-                    if (decimalCall) {
-                        decimal = await decimalCall().call()
-                    }
-                    let blance = await Contract.balanceOf(this.selectedAddress).call();
-           
-                    if(data.value * Math.pow(10, decimal) > blance.toNumber()) throw "余额不足"
-                    
-                    let result = await Contract.transfer(
-                        data.to,
-                        tronWeb.toHex(data.value * Math.pow(10, decimal))
-                    ).send(
-                        // {
-                        //     feeLimit: 10000000
-                        // }
-                    )
-             
-
-                    console.log(result);
-                    return result.txid
-                    // const parameter = [{ type: 'address', value: data.to * Math.pow(10, 18) }];
-                    // var tx = await tronWeb.transactionBuilder.triggerSmartContract(
-                    //     data.contract,
-                    //     "registrationExt(address)",
-                    //     {},
-                    //     parameter,
-                    //     this.selectedAddress
-                    // );
-                    // var signedTx = await tronWeb.trx.sign(tx.transaction);
-                    // var broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
-                    // console.log(broastTx)
-
-
-
-                } else {
-                    const blance = await tronWeb.trx.getBalance(data.from)
-                    if(blance <  data.value * Math.pow(10, 6)) throw "余额不足"
-                    let tx = await tronWeb.transactionBuilder.sendTrx(data.to, data.value * Math.pow(10, 6), data.from);
-                    // 签名  签名过程在TronLink中完成，然后把签名后的transaction返还给TronWeb进行广播。
-                    var signedTx = await tronWeb.trx.sign(tx);
-                    // 广播
-                    var broastTx = await tronWeb.trx.sendRawTransaction(signedTx);
-                    console.log(broastTx);
-                    return broastTx.txid
-                }
-
-            }
+            this.on(event, fn)
+          }
         }
 
-        //ui btn click
-        const btnsMethods = Array.from(document.querySelectorAll("button[data-method]"));
-        btnsMethods.forEach((el) => {
-            el.onclick = async function (event) {
-                try {
-                    const { method } = event.target.dataset;
-                    switch (method) {
-                        case "connect":
-                            await wallet.connect();
-                            break;
-                        case "sendTransaction":
-                            const txid = await wallet.sendTransaction({
-                                from: document.querySelector("#from").value,
-                                to: document.querySelector("#to").value,
-                                value: document.querySelector("#amount").value,
-                                contract: document.querySelector("#contract").value,
-                            });
-                            alert(txid);
-                            break;
-                        default: break
-
-                    }
-                } catch (error) {
-                    console.log(error)
-                    alert(typeof error == "object" ? JSON.stringify(error) : error + '!! There may not be a Tron network!!')
+        function _observer(obj, delay = 40 ) {
+          var queueObserver = new Set()
+          var timer = null
+          return {
+            state: new Proxy(obj, {
+              set(target, key, value) {
+                const oTarget = { ...target }
+                var result = Reflect.set(...arguments)
+                if(delay){
+                    clearTimeout(timer)
+                    timer = setTimeout(()=>{
+                      queueObserver.forEach((fn) => fn({ ...target }, oTarget))
+                    }, delay)
+                }else{
+                    queueObserver.forEach((fn) => fn({ ...target }, oTarget))
                 }
 
+                return result
+              },
+            }),
+            subscribe(fn) {
+              queueObserver.add(fn)
+            },
+          }
+        }
 
-            };
-        });
+
+
+
+
+
+
+
+
+
+        class Wallet extends EventEmitter {
+          constructor(type) {
+            super()
+            const { state, subscribe } = _observer({
+              address: '',
+              balance: 0,
+              type: type || 'bitkeep',
+            })
+            this.state = state
+
+            this.emit('stateChanged', { ...this.state }, { ...state })
+            subscribe((nState, oState) =>this.emit('stateChanged', nState, oState),)
+
+            this.onMessage = this.onMessage.bind(this)
+          }
+          setLock(lock) {
+            this.state.lock = lock
+          }
+          getLock() {
+            return this.state.lock
+          }
+          getProvider(type) {
+            try {
+              type = type || this.state.type
+              console.log('connected to', type)
+              let provider = null
+              if (type == 'bitkeep') {
+                if (!window.bitkeep || !window.bitkeep.tronLink)
+                  throw new Error('no bitKeep Walelt')
+                return {
+                  tronLink: window.bitkeep.tronLink,
+                  tronWeb: window.bitkeep.tronWeb,
+                }
+              } else {
+                if (!window.tronLink) throw new Error('no tronLink Walelt')
+                return {
+                  tronLink: window.tronLink,
+                  tronWeb: window.tronWeb,
+                }
+              }
+            } catch (error) {
+              alert(error.message)
+              console.error(error)
+            }
+          }
+          async connect(type = 'bitkeep') {
+              debugger
+            const { tronLink, tronWeb } = this.getProvider(type)
+            const result = await tronLink.request({  method: 'tron_requestAccounts'})
+            if (result.code != 200 || result.code ==4000) return
+            const address = tronWeb.defaultAddress.base58
+          //   this.state.type = type
+            Object.assign(this.state, {
+              address: address,
+              type,
+              balance: await tronWeb.trx.getBalance(address),
+            })
+            this.initEvent()
+          //  window.onmessage = console.log
+          }
+
+          initEvent() {
+            window.removeEventListener('message', this.onMessage)
+            window.addEventListener('message', this.onMessage)
+          }
+          onMessage(event) {
+            if (!event || !event.data || !event.data.message) return
+            if (this.state.type == 'bitkeep' && !event.data.isBitkeep) return
+            if (this.state.type == 'tronLink' && !event.data.isTronLink) return
+            const { action } = event.data.message
+
+            switch (action) {
+              case 'disconnect':
+              case 'disconnectWeb':
+                Object.assign(this.state,{
+                  address:"",
+                  balance:0
+                })
+                break
+              case 'disconnect':break
+              default:
+                break
+            }
+            console.log('_____', action)
+          }
+          async sendTransaction(data) {
+            const { tronLink, tronWeb } = this.getProvider()
+            // 创建交易
+            if (data.contract) {
+              let decimal = 18
+              let Contract = await tronWeb.contract().at(data.contract)
+              const decimalCall = Contract.decimals || Contract.DECIMALS
+              if (decimalCall) {
+                decimal = await decimalCall().call()
+              }
+              let blance = await Contract.balanceOf(this.state.address).call()
+
+              if (data.value * Math.pow(10, decimal) > blance.toNumber())
+                throw '余额不足'
+
+              let result = await Contract.transfer(
+                data.to,
+                tronWeb.toHex(data.value * Math.pow(10, decimal)),
+              )
+                .send
+                // {
+                //     feeLimit: 10000000
+                // }
+                ()
+
+              console.log(result)
+              return result.txid
+              // const parameter = [{ type: 'address', value: data.to * Math.pow(10, 18) }];
+              // var tx = await bitkeep.tronWeb.transactionBuilder.triggerSmartContract(
+              //     data.contract,
+              //     "registrationExt(address)",
+              //     {},
+              //     parameter,
+              //     this.state.address
+              // );
+              // var signedTx = await bitkeep.tronWeb.trx.sign(tx.transaction);
+              // var broastTx = await bitkeep.tronWeb.trx.sendRawTransaction(signedTx);
+              // console.log(broastTx)
+            } else {
+              const blance = await tronWeb.trx.getBalance(data.from)
+              if (blance < data.value * Math.pow(10, 6)) throw '余额不足'
+              let tx = await tronWeb.transactionBuilder.sendTrx(
+                data.to,
+                data.value * Math.pow(10, 6),
+                data.from,
+              )
+              // 签名  签名过程在bitkeep.tronLink中完成，然后把签名后的transaction返还给bitkeep.tronWeb进行广播。
+              var signedTx = await tronWeb.trx.sign(tx)
+              // 广播
+              var broastTx = await tronWeb.trx.sendRawTransaction(signedTx)
+              console.log(broastTx)
+              return broastTx.txid
+            }
+          }
+          signMessage(message, v2){
+                if(this.state.type=='bitkeep' && v2){
+                  alert(`bitkeep not support v2`)
+                  return
+                }
+                const method =  v2 ?  "signMessageV2" : "sign"
+                const { tronLink, tronWeb } = this.getProvider()
+                const signedString =  tronWeb.trx[method](message);
+                return signedString
+
+
+          }
+        }
 
         //init
-        const wallet = new Wallet();
-        if (wallet.isInstall) {
-            await wallet.connect();
-        }
+        const wallet = new Wallet()
+
+        window.onload = () => localStorage.wallet_type && wallet.connect(localStorage.wallet_type)
 
 
 
-      //doc
-         //官网https://www.tronlink.org/
-      // demo https://github.com/tronprotocol/tronweb/tree/master/demo/tron-dapp-react-demo
+
+
+
+        wallet.on('stateChanged', async function (Nstate, oState) {
+           console.log(Nstate, oState)
+          localStorage.setItem('wallet_type', Nstate.type)
+          //state
+          document.querySelector('#state').innerHTML = `${JSON.stringify(
+            Nstate,
+            null,
+            2,
+          )}`
+          // disabled
+          const allBtns = document.querySelectorAll('button[data-method')
+          const method = Nstate.lock ? 'setAttribute' : 'removeAttribute'
+          allBtns.forEach((el) => el[method]('disabled', Nstate.lock))
+
+
+
+          document.querySelector('#from').value = Nstate.address
+
+          document.querySelectorAll('.status').forEach(el=>el.classList.remove('connected'))
+          const walletDom = document.querySelector(
+            `button[data-method=${Nstate.type}]`,
+          ).parentElement
+          // walletDom.querySelector('.address').innerText = Nstate.address
+          // walletDom.querySelector('.balance').innerText = Nstate.balance
+          walletDom
+            .querySelector('.status')
+            .classList[Nstate.address ? 'add' : 'remove']('connected')
+
+
+        })
+
+        //ui btn click
+        Array.from( document.querySelectorAll('button[data-method]')).forEach((el) => {
+          el.onclick = async function (event) {
+            try {
+              
+              const { method } = event.target.dataset
+              if (wallet.getLock()) return
+              wallet.setLock(true)
+              switch (method) {
+                case 'bitkeep':
+                  await wallet.connect('bitkeep')
+                  break
+                case 'tronLink':
+                  await wallet.connect('tronLink')
+                  break
+                case 'sendTransaction':
+                  const txid = await wallet.sendTransaction({
+                    from: document.querySelector('#from').value,
+                    to: document.querySelector('#to').value,
+                    value: document.querySelector('#amount').value,
+                    contract: document.querySelector('#contract').value,
+                  })
+                  alert(txid)
+                  break
+
+
+                case 'signMessage':
+                    const  signMessageR =  await wallet.signMessage(document.querySelector("#message").value, false)  
+                    document.querySelector("#messagePre").innerText =  typeof signMessageR == 'string' ? signMessageR : JSON.stringify(signMessageR, null,2 )
+                   
+
+                  break
+                  case 'signMessageV2':
+                  const  signMessageV2R =  await wallet.signMessage(document.querySelector("#message").value, true)  
+                    document.querySelector("#messageV2Pre").innerText =  typeof signMessageV2R == 'string' ? signMessageV2R : JSON.stringify(signMessageV2R, null,2 )
+                   
+                  break
+
+                default:
+                  break
+              }
+              wallet.setLock(false)
+            } catch (error) {
+              console.log(error)
+              wallet.setLock(false)
+              alert(
+                typeof error == 'object'
+                  ? error.message
+                  : error + '!! There may not be a Tron network!!',
+              )
+            }
+          }
+        })
+
+        //doc
+        //官网https://www.bitkeep.tronLink.org/
+
+        window.addEventListener("message", function (event) {
+              console.log("windowmessage------", event.data.message)
+        })
     </script>
 </body>
 

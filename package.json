@@ -4,10 +4,13 @@
     "@mysten/wallet-adapter-react": "^7.0.0",
     "@suiet/wallet-adapter": "^0.0.18",
     "crypto-js": "^4.1.1",
+    "dx-const-id-sdk": "^0.1.0",
     "elliptic": "^6.5.4",
     "eth-sig-util": "^3.0.1",
     "ethers": "^5.6.6",
     "geoip-lite": "^1.4.5",
-    "koa2-generator": "^1.1.7"
+    "koa2-generator": "^1.1.7",
+    "md5": "^2.3.0",
+    "reflect-metadata": "^0.1.13"
   }
 }

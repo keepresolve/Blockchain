@@ -245,7 +245,6 @@
             }
           }
           async connect(type = 'bitkeep') {
-              debugger
             const { tronLink, tronWeb } = this.getProvider(type)
             const result = await tronLink.request({  method: 'tron_requestAccounts'})
             if (result.code != 200 || result.code ==4000) return
@@ -278,7 +277,12 @@
                   balance:0
                 })
                 break
-              case 'disconnect':break
+              case 'accountsChanged':
+                this.connect(this.state.type)
+                break
+              case 'setNode':
+                this.connect(this.state.type)
+                break
               default:
                 break
             }

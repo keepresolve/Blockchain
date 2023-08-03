@@ -1,13 +1,14 @@
 {
   "scripts": {
-    "complie":"truffle complie",
-    "migrate:ropsten":"truffle migrate --network ropsten ",
-    "migrate:bscText":"truffle migrate --network bscText ",
-    "migrate:Heco":"truffle migrate --network Heco "
+    "complie": "truffle complie",
+    "migrate:goerli": "truffle migrate --network goerli ",
+    "migrate:bscText": "truffle migrate --network bscText ",
+    "migrate:Heco": "truffle migrate --network Heco "
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
     "@truffle/hdwallet-provider": "^2.0.5",
+    "dotenv": "^16.3.1",
     "global": "^4.4.0",
     "truffle": "^5.5.9"
   }

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Document</title>
+    <!-- <script src="./js/vconsole.js"></script> -->
+    <style>
+        #logger {
+            word-wrap: break-word;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <pre id="logger"></pre>
+
+    <script>
+
+        let cache = []
+        const circularFn = (key, value) => {
+
+            if (typeof value === 'object' && value !== null) {
+                if (cache.includes(value)) {
+                    return '[Circular]';
+                }
+                cache.push(value);
+            }
+            return value;
+        }
+
+
+
+
+        var log = console.log
+        var error = console.error
+        var preLoggerDom = document.querySelector("#logger")
+        console.log = function () {
+            log.apply(window, arguments)
+            const htmlStr = Array.from(arguments)
+                .map(v => (typeof v == 'object' ? JSON.stringify(v, circularFn, 2) : v))
+                .map((v,i)=>{
+                        if(i==0) v+=":\r\n"
+                        return v
+                })
+                .join(' ')
+            preLoggerDom.innerHTML += '<span>' + htmlStr + '</span>\r\n'
+        }
+        console.success = function () {
+            log.apply(window, arguments)
+
+            preLoggerDom.innerHTML +=
+                "<span style='color:green;font-weight:600'>" +
+                Array.from(arguments)
+                    .map(v => (typeof v == 'object' ? JSON.stringify(v, circularFn, 2) : v))
+                    .map((v,i)=>{
+                        if(i==0) v+=":\r\n"
+                        return v
+                    })
+                    .join(' ') +
+                '</span>\r\n'
+        }
+        console.error = function () {
+            error.apply(window, arguments)
+            preLoggerDom.innerHTML +=
+                "<span style='color:red;font-weight:800'>" +
+                Array.from(arguments)
+                    .map(v => (typeof v == 'object' ? JSON.stringify(v, circularFn, 2) : v))
+                    .map((v,i)=>{
+                        if(i==0) v+=":\r\n"
+                        return v
+                    })
+                    .join(' ') +
+                '</span>\r\n'
+        }
+
+        window.onerror = reportError;
+        function reportError(sMessage, sUrl, sLine) {
+
+            var str = "";
+            str += " 错误信息:" + sMessage + "\n";
+            str += " 错误地址:" + sUrl + "\n";
+            str += " 错误行数:" + sLine + "\n";
+            str += "<=========调用堆栈=========>\n";
+            var func = window.onerror.caller;
+            var index = 0;
+            while (func != null) {
+                //str += "第" + index + "个函数：" + func + "\n";
+                //str += "第" + index + "个函数：参数表："
+                //for(var i=0;i<func.arguments.count;i++)
+                //str += func.arguments[i] + ",";
+                //}
+                str += func;
+                str += "\n===================\n";
+                func = func.caller;
+                index++;
+            }
+            alert(str);
+            return true;
+        }
+
+    </script>
+    <script type='module'>
+        import { detectBitkeepProvider,TronLinkAdapter,  LegacyEip155Adapter, BitkeepDapter } from "./index.js"
+  
+        // new VConsole()
+
+        // if (window.ethereum) {
+        //     console.success("初始化成功获取ethereum的地址: " + ethereum.selectedAddress, ethereum)
+        // } else {
+        //     console.error("初始化获取ethereum和地址失败 ", window.ethereum)
+        // }
+
+
+
+        async function init() {
+
+            //单个bitKeep引用实例
+  
+            // (async function(){
+            //         const sdkEip155Provider =  new LegacyEip155Adapter()
+            //         const  Etherume =  sdkEip155Provider.getProvider()
+            //         Etherume.enable()
+
+            //         const sdkTronLinkProvider =  new TronLinkAdapter()
+            //         const  { tronLink } =  sdkTronLinkProvider.getProvider()
+            //         const result = await tronLink.request({  method: 'tron_requestAccounts'})
+
+
+            //         //单个MetaMask引用实例
+            //         const sdkEip155Provider =  new LegacyEip155Adapter({isBitKeep:false})
+            //         const  Etherume =  sdkEip155Provider.getProvider()
+            //         Etherume.enable()
+
+            //         const sdkTronLinkProvider =  new TronLinkAdapter({isBitKeep:false})
+            //         const  { tronLink } =  sdkTronLinkProvider.getProvider()
+            //         const result = await tronLink.request({  method: 'tron_requestAccounts'})
+            // })()
+
+
+
+
+            // 多个
+            // (async function(){
+                const  sdkBitkeep =   new BitkeepDapter({isBitkeep:false})
+                
+                //meteMask
+                console.success("开始链接metaMask", await sdkBitkeep.connect({}, false, "eip155").catch(err=>console.error(err)))
+                console.success("开始链接bitkeep以太坊", await sdkBitkeep.connect({}, true, "eip155").catch(err=>console.error(err)))
+                console.success("开始bitkeep以太坊签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, true, "eip155").catch(err=>console.error(err)))
+                console.success("开始meteMask以太坊签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, false, "eip155").catch(err=>console.error(err)))
+
+
+
+                console.success("开始bitkeep以太坊交易签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, true, "eip155").catch(err=>console.error(err)))
+                console.success("开始meteMask以太坊交易签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, false, "eip155").catch(err=>console.error(err)))
+
+
+
+
+
+                //tronLink
+                console.success("开始链接tronLink", await sdkBitkeep.connect({}, false, "tronLink").catch(err=>console.error(err)))
+                console.success("开始链接bitkeep的波长", await sdkBitkeep.connect({}, true, "tronLink").catch(err=>console.error(err)))
+                console.success("开始bitkeep波长签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, true, "tronLink").catch(err=>console.error(err)))
+                console.success("开始tronLink签名",  await sdkBitkeep.signMessage ({message:"sign Message"}, false, "tronLink").catch(err=>console.error(err)))
+
+             
+
+                
+                
+        
+            //     console.log(sdkBitkeep)
+            // })()
+           
+
+            
+
+
+            // (async function(){
+            //     const eip155Provider = await detectBitkeepProvider({ flag: "eip155", timeout: 1000 })
+            //     if(!eip155Provider) alert("provider no detected")
+            //     eip155Provider.enable()
+
+
+            //      const tronProvider = await detectBitkeepProvider({ flag: "tronLink", timeout: 1000 })
+            //     await tronProvider.tronLink.request({  method: 'tron_requestAccounts'})
+
+
+            //      const tronProvider = await detectBitkeepProvider({ flag: "tronLink", timeout: 1000 , isBitKeep:false}, )
+            //      console.log(tronProvider)
+            // })()
+
+            
+
+
+           
+
+
+
+           
+        }
+
+        
+
+        init()
+    </script>
+
+</body>
+
+</html>

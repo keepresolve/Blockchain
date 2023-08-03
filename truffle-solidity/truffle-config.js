@@ -17,7 +17,7 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
-
+require("dotenv").config();
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 //
 // const fs = require('fs');
@@ -59,10 +59,20 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
 
+
+    goerli: {
+
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, process.env.goerli),  // 申请地址 https://infura.io/dashboard
+      network_id: 5, // Ropsten's id
+      gas: 5500000, // Ropsten has a lower block limit than mainnet
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 100000, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+    },
     ropsten: {
 
-      provider: () => new HDWalletProvider("助记词或者私钥地址", `https://ropsten.infura.io/v3/自己申请的projectId`),  // 申请地址 https://infura.io/dashboard
-      network_id: 3, // Ropsten's id
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://rpc.ankr.com/eth_goerli`),  // 申请地址 https://infura.io/dashboard
+      network_id: 5, // Ropsten's id
       gas: 5500000, // Ropsten has a lower block limit than mainnet
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 100000, // # of blocks before a deployment times out  (minimum/default: 50)
@@ -70,7 +80,7 @@ module.exports = {
     },
     bscText: {
 
-      provider: () => new HDWalletProvider("助记词或者私钥地址", `https://ropsten.infura.io/v3/自己申请的projectId`),  // 申请地址 https://infura.io/dashboard
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://data-seed-prebsc-2-s2.binance.org:8545`),  // 申请地址 https://infura.io/dashboard
       network_id: 97, // Ropsten's id
       gas: 5500000, // Ropsten has a lower block limit than mainnet
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
@@ -88,7 +98,7 @@ module.exports = {
     
     // Useful for private networks
     // private: {
-    //   provider: () => new HDWalletProvider("6893106dcda86ea2b019068f0d3a3d8f8d1dd0140f7466d60782a2b7ea06b539", `https://ropsten.infura.io/v3`),
+    //   provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://ropsten.infura.io/v3`),
     //   network_id: 3,   // This network is yours, in the cloud.
     //   production: false    // Treats this network as if it was a public net. (default: false)
     // }

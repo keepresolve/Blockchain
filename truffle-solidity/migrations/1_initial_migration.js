@@ -1,14 +1,14 @@
-const Migrations = artifacts.require("Migrations");
-
+// const Migrations = artifacts.require("Migrations");
+const HDWalletProvider = require("@truffle/hdwallet-provider");
 // module.exports = function (deployer) {
 //   deployer.deploy(Migrations);
 // };
 
-const SimpleStorage = artifacts.require("SimpleStorage");
+// const SimpleStorage = artifacts.require("WeatherOracle");
 
-module.exports = function(deployer) {
-    deployer.deploy(SimpleStorage);
-};
+// module.exports = function(deployer) {
+//     deployer.deploy(SimpleStorage);
+// };
 
 //erc20 token
 
@@ -21,6 +21,11 @@ module.exports = function(deployer) {
 //批量转账合约
 // const MultiSender = artifacts.require("MultiSender");
 
+// 
+const WeatherOracle = artifacts.require("WeatherOracle");
+module.exports = function(deployer) {
+    deployer.deploy(WeatherOracle, "address");
+};
 // module.exports = function(deployer) {
-//     deployer.deploy(MultiSender,0,'0xc82D88971c1cC94c1e0821aDD449a4655C98E2BA');
+//     deployer.deploy(SimpleStorage,0,'0xEba15228d988803E3bB740ecA47a7cC7a0463fAe');
 // };

@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "name": "@bitkeep/web3-sdk",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/*.ts"
+  ],
+  "scripts": {
+    "test1": "node ./test/valtio.test.js",
+    "dev": "esbuild src/index.ts --outdir=dist --bundle --format=esm --servedir=dist --watch ",
+    "build": "node esbuild.config",
+    "test": "",
+    "lint": "",
+    "prepare": ""
+  },
+  "peerDependencies": {},
+  "//husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "author": "faraway.cao",
+  "devDependencies": {
+    "esbuild": "^0.18.10",
+    "eventemitter3": "^5.0.1"
+  }
+}

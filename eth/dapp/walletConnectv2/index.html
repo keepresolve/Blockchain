@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/ethers/5.6.6/ethers.umd.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/web3/1.9.0/web3.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/encoding"></script>
+
+    <style>
+        #jsonView{
+            /* height:300px; */
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+  
+    <button id="connect-button">Connect with Wallet</button>
+    <button id="disconnect-button">disconnect</button>
+    <button id="personalSign-button">PersonalSign</button>
+    <button id="ethSignTransaction-button"> ethSignTransaction</button>
+    <button id="ethSign-button"> ethSign</button>
+    <div id="jsonView"></div>
+    <script>
+        window.process = {
+            env: {
+                NODE_ENV: ""
+            }
+        }
+    </script>
+    <script>
+        class EventEmitter {
+            constructor() {
+                this._listeners = {}
+                this.maxListener = 10
+                this.addListener = this.on
+            }
+            on(event, cb) {
+                var listeners = this._listeners
+                // if (listeners[event] && listeners[event].length >= this.maxListener) {
+                //     throw console.error('监听器的最大数量是%d,您已超出限制', this.maxListener)
+                // }
+                if (listeners[event] instanceof Array) {
+                    if (listeners[event].indexOf(cb) === -1) {
+                        listeners[event].push(cb)
+                    }
+                } else {
+                    listeners[event] = [].concat(cb)
+                }
+            }
+
+            emit(event) {
+                var args = Array.prototype.slice.call(arguments)
+                args.shift()
+                if (!this._listeners[event]) return
+                this._listeners[event].forEach(cb => {
+                    cb.apply(null, args)
+                })
+            }
+
+            listeners(event) {
+                return this._listeners[event] || []
+            }
+
+            setMaxListeners(num) {
+                this.maxListener = num
+            }
+
+            removeListener(event, listener) {
+                var listeners = this._listeners
+                var arr = listeners[event] || []
+                var i = arr.indexOf(listener)
+                if (i >= 0) {
+                    listeners[event].splice(i, 1)
+                }
+            }
+            off(event, listener) {
+                var listeners = this._listeners
+                var arr = listeners[event] || []
+                var i = arr.indexOf(listener)
+                if (i >= 0) {
+                    listeners[event].splice(i, 1)
+                }
+            }
+
+            removeAllListener(event) {
+                this._listeners[event] = []
+            }
+
+            removeAllListeners(eventNames = []) {
+                eventNames.forEach(name => delete this._listeners[name])
+            }
+
+            once(event, listener) {
+                var self = this
+
+                function fn() {
+                    var args = Array.prototype.slice.call(arguments)
+                    listener.apply(null, args)
+                    // self.removeListener(event, fn);
+                }
+                this.on(event, fn)
+            }
+        }
+
+        function _observer(obj) {
+            var queueObserver = new Set()
+            var dispathChangeHandler = ((delay)=>{
+                 let timer = null
+                 return function(traget, obj){
+                     clearTimeout(timer)
+                     timer = setTimeout(()=> queueObserver.forEach(fn => fn(traget, obj)),delay)
+                 }
+            })(30)
+            return {
+                state: new Proxy(obj, {
+                    set(traget, key, value, target) {
+                        var result = Reflect.set(traget, key, value, target)
+                        dispathChangeHandler(traget, obj)
+                        return result
+                    }
+                }),
+                subscribe(fn) {
+                    queueObserver.add(fn)
+                }
+            }
+        }
+
+
+    </script>
+    <script type="module">
+
+
+        import { WalletConnectModal } from 'https://unpkg.com/@walletconnect/modal'
+       
+   
+
+        // https://docs.walletconnect.com/2.0/web/walletConnectModal/sign/html/options
+        import { WalletConnectModalSign } from 'https://unpkg.com/@walletconnect/modal-sign-html'
+
+     
+
+
+        // const modal = new WalletConnectModal({
+        //     projectId: '4d0b08c5016afa18ffcb7cef1c627196',
+        //     chains: ['eip155:1']
+        // })
+
+        //     ; (async () => {
+        //         await modal.openModal({
+        //             uri: 'YOUR_CONNECTION_URI'
+        //         })
+
+        //     })()
+
+        // modal.subscribeModal(state => console.log(state))
+
+        // // modal.closeModal()
+
+
+
+
+
+        const { state, subscribe } = _observer({
+            Sessions: [],
+            session: null,
+            transaction:{},
+            // transactions:[],
+            chianNet: {
+                rpc: "https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8",
+                chainId: 1,
+                scan: "https://etherscan.io"
+            },
+
+            WalletConnectModaOptions: {
+                modalOptions: {
+                    themeMode: 'dark' // https://docs.walletconnect.com/2.0/web/walletConnectModal/sign/html/theming
+                },
+                termsOfServiceUrl: 'https://example.com/terms-and-conditions',
+                explorerRecommendedWalletIds: [
+                    'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
+                    '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0'],
+                projectId: "",  // https://cloud.walletconnect.com/sign-in 
+                metadata: {
+                    name: 'opensea',
+                    description: '我是的url是localhost本地模拟',
+                    url: 'opensea.com',
+                    icons: ['https://www.google.com/search?q=opensea&sxsrf=AB5stBhqBl4ShysqbSvpyGv_cOEnNf8PBA:1688790348620&tbm=isch&source=iu&ictx=1&vet=1&fir=dNjrrvv-5YqAAM%252CgtrABr4SHC3h4M%252C%252Fg%252F11ng76wpfc&usg=AI4_-kRpq83f7Wx_SNtUl8H1IT2hKyhu9Q&sa=X&ved=2ahUKEwj-mtGmov7_AhX1bKQEHXSbCrUQ_B16BAgzEAI#imgrc=dNjrrvv-5YqAAM']
+                }
+            }
+        })
+
+        subscribe((json)=> $("#jsonView").JSONView(JSON.stringify(json), { collapsed: true }))
+       
+
+
+        
+        const web3 = new Web3(state.chianNet.rpc)
+        const modal = new WalletConnectModalSign(state.WalletConnectModaOptions)
+        onInit()
+
+
+
+
+
+        async function onInit() {
+            const offsubscribeSessionEvents = await subscribeSessionEvents()
+            state.Sessions = await modal.getSessions()
+            console.log(state.Sessions)
+        }
+        async function subscribeSessionEvents(session) {
+            const offEvents = {}
+            const events = {
+                onSessionEvent: async function onSessionEvent() {
+                    modal.onSessionEvent(callBack)
+                    function callBack(data) {
+                        console.info("onSessionEvent", data)
+                    }
+                    return () => {
+                        modal.offSessionEvent(callBack)
+                    }
+                },
+                onSessionUpdate: async function onSessionUpdate() {
+                    modal.onSessionUpdate(callBack)
+                    function callBack(data) {
+                        console.info("onSessionUpdate", data)
+                    }
+                    return () => {
+                        modal.offSessionUpdate(callBack)
+                    }
+                },
+                onSessionDelete: async function onSessionDelete() {
+                    modal.onSessionDelete(callBack)
+                    function callBack(data) {
+                            
+                    
+                        const index = state.Sessions.findIndex(session => session.topic == data.topic)
+                        const Sessions =[...state.Sessions]
+                        
+                        console.info("onSessionDelete", index, data)
+                        if(index != -1){
+                            Sessions.splice(index, 1)
+                            state.Sessions  = Sessions
+                        }
+                        if(state.session && state.session.topic == data.topic) state.session = null
+                    
+                    }
+                    return () => {
+                        modal.offSessionDelete(callBack)
+                    }
+                },
+                onSessionExpire: async function onSessionExpire() {
+                    modal.onSessionExpire(callBack)
+                    function callBack(data) {
+                        console.info("onSessionExpire", data)
+                    }
+                    return () => {
+                        modal.offSessionExpire(callBack)
+                    }
+                }
+
+            }
+            Object.keys(events).forEach(eventNames => {
+                offEvents[eventNames] = events[eventNames]()
+            })
+            return () => {
+                Object.keys(offEvents).forEach(eventNames => {
+                    offEvents[eventNames]()
+                })
+            }
+        }
+
+
+
+
+
+
+
+
+        async function onConnect() {
+            // https://docs.walletconnect.com/2.0/specs/clients/sign/namespaces
+            state.session = await modal.connect({
+                requiredNamespaces: {
+                    eip155: {
+                        methods: ['eth_sendTransaction', 'personal_sign', 'eth_signTransaction', "eth_sign"],
+                        chains: ['eip155:1'],
+                        events: ['chainChanged', 'accountsChanged']
+                    }
+                }
+            })
+
+            state.Sessions =[...state.Sessions, state.session]
+            // https://docs.walletconnect.com/2.0/specs/clients/sign/data-structures#session
+            console.info(state.Sessions)
+        }
+
+        async function onDisconnect() {
+            await Promise.all(state.Sessions.map(session=>
+                modal.disconnect({
+                    topic: session.topic,
+                    reason: "USER_DISCONNECTED"
+                }).catch(err=>err)
+            ))
+            console.log("success")
+            // await modal.disconnect({
+            //     topic: state.session.topic,
+            //     reason: "USER_DISCONNECTED"
+            // })
+        }
+
+
+        async function onEthSignTransaction() {
+
+            const value = ethers.utils.parseEther('0.00001')._hex
+            const selectedAddress = state.session.namespaces['eip155']["accounts"][0].split(":")[2]
+            const gasPrice = await web3.eth.getGasPrice();
+            const gasLimit = await web3.eth.estimateGas({ from: selectedAddress, to: selectedAddress, value: value, data: '0x' })
+            const nonce = await web3.eth.getTransactionCount(selectedAddress)
+       
+
+            const transaction = {
+                from: selectedAddress,
+                to: selectedAddress,
+                value: value,
+                gasLimit: "0x" + Number(gasLimit).toString(16),
+                gasPrice: "0x" + Number(gasPrice).toString(16),
+                // gasLimit: "0x5208",
+                // gasPrice: ethers.utils.parseUnits(gasPrice, 'gwei'),
+                data: "0x",
+                nonce: "0x" + Number(nonce).toString(16),
+                type: "0x2", // 1 2
+
+                maxFeePerGas: "0xcd46add9c",
+                maxPriorityFeePerGas: "0x9502F900",
+                chainId: state.chianNet.chainId
+
+            }
+
+            
+            state.transaction = {
+                status:"unsign",
+                tx: transaction
+            }
+  
+  
+            const signedTx = await modal.request({
+                topic: state.session.topic,
+                chainId: 'eip155:1',
+                request: {
+                    id: 1,
+                    jsonrpc: '2.0',
+                    method: 'eth_signTransaction',
+                    params: [
+                        transaction
+                    ]
+                }
+            })
+
+
+            state.transaction = {
+                status:"signed",
+                signedTx,
+                tx: transaction
+            }
+            
+
+            console.log("eth_signTransaction", signedTx)
+            const isConfirm = confirm("已经生成签名是否确认广播?")
+            if (!isConfirm) return
+
+
+            state.transaction = {
+                status:"pedding",
+                signedTx,
+                tx: transaction
+            }
+            
+            const { transactionHash } = await web3.eth.sendSignedTransaction(signedTx)
+
+
+           
+            const txIdScan  = `${state.chianNet.scan}/tx/${transactionHash}`
+            const isConfirmOpen = confirm("confirm open:" + txIdScan)
+
+
+            state.transaction = {
+                status:"success",
+                signedTx,
+                tx: transaction,
+                txIdScan
+            }
+
+
+            console.log("区块浏览器", txIdScan)
+            if (!isConfirmOpen) return
+            window.open(txIdScan, "__blank")
+        }
+
+        async function onEthSign() {
+
+            const value = ethers.utils.parseEther('0.00001')
+            const selectedAddress = state.session.namespaces['eip155']["accounts"][0].split(":")[2]
+            const gasPrice = await web3.eth.getGasPrice();
+            const gasLimit = await web3.eth.estimateGas({ from: selectedAddress, to: selectedAddress, value: value, data: '0x' })
+            const nonce = await web3.eth.getTransactionCount(selectedAddress) // pending
+
+
+
+            const transaction = {
+                // from: this.selectedAddress,
+                to: selectedAddress, // 和那个地址或者合约进行交互
+                value: value,
+                gasLimit: "0x" + Number(gasLimit).toString(16),
+                gasPrice: "0x" + Number(gasPrice).toString(16),
+                // gasLimit: "0x5208",
+                // gasPrice: "0x" + Number(gasPrice).toString(16),
+                data: "0x",
+                nonce: "0x" + Number(nonce).toString(16),
+                type: null,
+
+                //maxFeePerGas: "0xcd46add9c",
+                //maxPriorityFeePerGas: "0x9502F900",
+                // chainId: state.chianNet.chainId
+
+            }
+
+            let serializedTransaction = await ethers.utils.serializeTransaction(transaction)
+            let hash = ethers.utils.keccak256(serializedTransaction)
+            const response = await modal.request({
+                topic: state.session.topic,
+                chainId: 'eip155:1',
+                request: {
+                    id: 1,
+                    jsonrpc: '2.0',
+                    method: 'eth_sign',
+                    params: [
+                        selectedAddress,
+                        hash
+                    ]
+                }
+            })
+        
+            let signedTx = await ethers.utils.serializeTransaction(transaction, response)
+
+            console.log("eth_sign", signedTx)
+
+            const isConfirm = confirm("已经生成签名是否确认广播?")
+            if (!isConfirm) return
+
+            const { transactionHash } = await web3.eth.sendSignedTransaction(signedTx)
+
+
+            const txIdScan  = `${state.chianNet.scan}/tx/${transactionHash}`
+            const isConfirmOpen = confirm("confirm open:" + txIdScan)
+
+            console.log("区块浏览器", txIdScan)
+
+            if (!isConfirmOpen) return
+
+            window.open(txIdScan, "__blank")
+
+           
+            // const response = await modal.request({
+            //     topic: state.session.topic,
+            //     chainId: 'eip155:1',
+            //     request: {
+            //         "id": 2,
+            //         "jsonrpc": "2.0",
+            //         "method": "eth_sendRawTransaction",
+            //         "params": [ signedTx]
+            //     }
+            // }).catch(err => console.error(err))
+
+        }
+
+
+        async function onPersonalSign() {
+            const response = await modal.request({
+                topic: state.session.topic,
+                chainId: 'eip155:1',
+                request: {
+                    id: 1,
+                    jsonrpc: '2.0',
+                    method: 'personal_sign',
+                    params: [
+                        state.session.namespaces['eip155']["accounts"][0].split(":")[2],
+                        '0x7468697320697320612074657374206d65737361676520746f206265207369676e6564'
+                    ]
+                }
+            })
+            console.log(response)
+        }
+
+
+
+
+
+
+
+        
+
+        document.getElementById('connect-button').addEventListener('click', onConnect)
+        document.getElementById('disconnect-button').addEventListener('click', onDisconnect)
+        document.getElementById('personalSign-button').addEventListener('click', onPersonalSign)
+        document.getElementById('ethSignTransaction-button').addEventListener('click', onEthSignTransaction)
+        document.getElementById('ethSign-button').addEventListener('click', onEthSign)
+
+
+    </script>
+
+
+
+
+
+
+</body>
+
+</html>

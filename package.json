@@ -9,6 +9,7 @@
     "eth-sig-util": "^3.0.1",
     "ethers": "^5.6.6",
     "geoip-lite": "^1.4.5",
+    "http-server": "^14.1.1",
     "koa2-generator": "^1.1.7",
     "md5": "^2.3.0",
     "reflect-metadata": "^0.1.13"

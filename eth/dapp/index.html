@@ -1,646 +1,989 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
 
-    <script src="./js/web3.min.js"></script>
-    <script src="./js/ethers.umd.min.js"></script>
-    <script src="./abi/erc20.js"></script>
-    <script src="./abi/poolABI.js"></script>
-    <script src="./abi/demoAbi.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
 
-    <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.14.6/vconsole.min.js"></script>
-    <style>
-      body > div {
-        display: flex;
-        flex-direction: column;
-        max-width: 500px;
-        margin-top: 30px;
-      }
+  <script src="./js/web3.min.js"></script>
+  <script src="./js/ethers.umd.min.js"></script>
+  <script src="./abi/erc20.js"></script>
+  <script src="./abi/poolABI.js"></script>
+  <script src="./abi/demoAbi.js"></script>
+  <script src="./js/vconsole.js"></script>
+  <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.14.6/vconsole.min.js"></script> -->
+  <style>
+    body>div {
+      display: flex;
+      flex-direction: column;
+      max-width: 500px;
+      margin-top: 30px;
+    }
 
-      input {
-        height: 30px;
-        width: 100%;
-      }
-      .box-tools{
-        display: flex;
-      
-      }
-      .flex-item{}
-      .dotte{
-         border: 1px solid;
-      }
-    </style>
-  </head>
+    input {
+      height: 30px;
+      width: 100%;
+    }
 
-  <body>
-    <div class="box-tools">
-        <div class="flex-item">
-          <h1>解析交易参数</h1>
-          <input name="" id="parseTransaction_params"  value="0x02f8ad01808301284d8301d97c825208945c39bc68e58a242a624e4fc96be77a383c52002d80b844a9059cbb000000000000000000000000bffe3510b10a7f89fb836266f330f8776c0dc63d000000000000000000000000000000000000000000000003ad9151fb0c67c000c001a0432964751771eb0a630cd3c3900290b43b6167b058fdd65da531c1508746cb16a02fc07c31ba1ce9a42e7ae08b2fbd7bf43dd2bf2fabf57869e8b087108e8182e8"></input>
-          <textarea name="" id="parseTransaction_result" cols="60" rows="15"></textarea>
-          <button data-method="parseTransaction_parse">解析</button>
-        </div>
-        <div class="flex-item">
-          <h1>广播已经交易的签名</h1>
-          <input type="text" id="transaction_rpc" value="https://data-seed-prebsc-1-s1.binance.org:8545" />
-          <input type="text" id="transaction_params" width="400px" value="0x02f8ad01808301284d8301d97c825208945c39bc68e58a242a624e4fc96be77a383c52002d80b844a9059cbb000000000000000000000000bffe3510b10a7f89fb836266f330f8776c0dc63d000000000000000000000000000000000000000000000003ad9151fb0c67c000c001a0432964751771eb0a630cd3c3900290b43b6167b058fdd65da531c1508746cb16a02fc07c31ba1ce9a42e7ae08b2fbd7bf43dd2bf2fabf57869e8b087108e8182e8" />
-          <!-- chainId:<span id="chainId">97</span> -->
-          <textarea name="" id="transaction_result" cols="60" rows="15"></textarea>
-          <button data-method="transaction_send">广播</button>
-        </div>
+    .box-tools {
+      display: flex;
 
-        <div class="flex-item">
-          <h1>查询交易hash</h1>
-          <input type="text" id="transaction_search_rpc" value="https://data-seed-prebsc-1-s1.binance.org:8545" />
-          <input type="text" id="transaction_search_params" width="400px" value="" />
-          <!-- chainId:<span id="chainId">97</span> -->
-          <textarea name="" id="transaction_search_result" cols="60" rows="15"></textarea>
-          <button data-method="transaction_search">查询交易hash</button>
-        </div>
+    }
+
+    .flex-item {}
+
+    .dotte {
+      border: 1px solid;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box-tools">
+    <div class="flex-item">
+      <h1>解析交易参数</h1>
+      <input name="" id="parseTransaction_params"
+        value="0x02f8ad01808301284d8301d97c825208945c39bc68e58a242a624e4fc96be77a383c52002d80b844a9059cbb000000000000000000000000bffe3510b10a7f89fb836266f330f8776c0dc63d000000000000000000000000000000000000000000000003ad9151fb0c67c000c001a0432964751771eb0a630cd3c3900290b43b6167b058fdd65da531c1508746cb16a02fc07c31ba1ce9a42e7ae08b2fbd7bf43dd2bf2fabf57869e8b087108e8182e8"></input>
+      <textarea name="" id="parseTransaction_result" cols="60" rows="15"></textarea>
+      <button data-method="parseTransaction_parse">解析</button>
     </div>
-    <h4 class="dotte"></h4>
-    <h1>Dapp</h1>
-    <div>
-      <h1>修改钱包</h1>
-      <button data-method="changeWalelt" data-value="bitkeep">bitkeep</button>
-    </div>
-    <div>
-      <h1>链接</h1>
-      <button data-method="connect">connect</button><span id="account">--</span>
-    </div>
-    <div>
-      <h1>切换网络</h1>
-      chainId :<input id="chainId" type="text" />
-      <button data-method="wallet_switchEthereumChain">wallet_switchEthereumChain</button>
-    </div>
-    <div>
-      <h1>转账EVM</h1>
-      from:<input id="from" type="text" /> to:<input id="to" type="text" /> amount:<input id="amount" type="number" /> 代币contract：<input id="contract" value="" type="text" />
-      <button data-method="sendTransaction">sendTranstion</button>
+    <div class="flex-item">
+      <h1>广播已经交易的签名</h1>
+      <input type="text" id="transaction_rpc" value="https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8" />
+      <input type="text" id="transaction_params" width="400px"
+        value="0x02f8ad01808301284d8301d97c825208945c39bc68e58a242a624e4fc96be77a383c52002d80b844a9059cbb000000000000000000000000bffe3510b10a7f89fb836266f330f8776c0dc63d000000000000000000000000000000000000000000000003ad9151fb0c67c000c001a0432964751771eb0a630cd3c3900290b43b6167b058fdd65da531c1508746cb16a02fc07c31ba1ce9a42e7ae08b2fbd7bf43dd2bf2fabf57869e8b087108e8182e8" />
+      <!-- chainId:<span id="chainId">97</span> -->
+      <textarea name="" id="transaction_result" cols="60" rows="15"></textarea>
+      <button data-method="transaction_send">广播</button>
     </div>
 
-    <div>
-      <h1>personal_sign</h1>
-      签名数据: <input id="personal_sign" type="text" />
-      <textarea name="" id="personal_sign_result" cols="30" rows="10"></textarea>
-      <button data-method="personal_sign">personal_sign</button>
-      <code data-code="personal_sign"> </code>
+    <div class="flex-item">
+      <h1>查询交易hash</h1>
+      <input type="text" id="transaction_search_rpc" value="https://data-seed-prebsc-1-s1.binance.org:8545" />
+      <input type="text" id="transaction_search_params" width="400px" value="" />
+      <!-- chainId:<span id="chainId">97</span> -->
+      <textarea name="" id="transaction_search_result" cols="60" rows="15"></textarea>
+      <button data-method="transaction_search">查询交易hash</button>
     </div>
+  </div>
+  <h4 class="dotte"></h4>
+  <h1>Dapp</h1>
+  <div>
+    <h1>修改钱包</h1>
+    <button data-method="changeWalelt" data-value="bitkeep">bitkeep</button>
+  </div>
+  <div>
+    <h1>链接</h1>
+    <button data-method="connect">connect</button><span id="account">--</span>
+  </div>
+  <div>
+    <h1>切换网络</h1>
+    chainId :<input id="chainId" type="text" />
+    <button data-method="wallet_switchEthereumChain">wallet_switchEthereumChain</button>
+  </div>
+  <div>
+    <h1>转账EVM</h1>
+    from:<input id="from" type="text" /> to:<input id="to" type="text" /> amount:<input id="amount" type="number"
+      value="0.0001" />
+    代币contract：<input id="contract" value="0x55d398326f99059ff775485246999027b3197955" type="text" />
+    转账类型
+    <select id="transferType">
+      <option value="2">eip1559</option>
+      <option value="0">0x0</option>
+    </select>
+    <button data-method="sendTransaction">sendTranstion</button>
+    <button data-method="sign_Transaction">sign_Transaction</button>
 
-    <!-- <div>
+    <button data-method="eth_sign">eth_sign</button>
+    <button data-method=""></button>
+
+
+    <button data-method="fee_get">getFee</button>
+    <textarea name="" id="fee_get_result" cols="30" rows="10"></textarea>
+  </div>
+
+  <div>
+    <h1>personal_sign</h1>
+    签名数据: <input id="personal_sign" type="text" />
+    <textarea name="" id="personal_sign_result" cols="30" rows="10"></textarea>
+    <button data-method="personal_sign">personal_sign</button>
+    <code data-code="personal_sign"> </code>
+  </div>
+
+
+  <div>
+    <h1>当前预估gasfee</h1>
+
+  </div>
+
+  <!-- <div>
       <h1>sign</h1>
       签名数据: <input id="sign" type="text" />
       <textarea name="" id="sign_result" cols="30" rows="10"></textarea>
       <button data-method="sign">sign</button>
       <code data-code="sign"> </code>
     </div> -->
-    <div>
-      <h1>批量转账</h1>
-      <div style="padding: 0; margin: 0">
-        暂没有发其他链的批量合约地址
-        <br />
-        128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
-        <br />
-        3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", 0x2417860dEbAFe9Fc08027D309145590e9574232F // ropsten测试合约地址
+  <div>
+    <h1>批量转账</h1>
+    <div style="padding: 0; margin: 0">
+      暂没有发其他链的批量合约地址
+      <br />
+      128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
+      <br />
+      3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", 0x2417860dEbAFe9Fc08027D309145590e9574232F // ropsten测试合约地址
 
-        testbsc 0x7Ddf5805B5a73c3D065Dd122341B0f198719507B
-        <br />
-      </div>
-      批量转账合约contract：<input id="mltcontract" value="0x6f7b49ea570a9aeb19d95dda6268fb35263561c2" type="text" /> 代币contract：<input id="mltTokencontract" value="0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d" type="text" />
-      地址：
-      <textarea name="" id="addresses" cols="30" rows="10">
+      testbsc 0x7Ddf5805B5a73c3D065Dd122341B0f198719507B
+      <br />
+    </div>
+    批量转账合约contract：<input id="mltcontract" value="0x6f7b49ea570a9aeb19d95dda6268fb35263561c2" type="text" />
+    代币contract：<input id="mltTokencontract" value="0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d" type="text" />
+    地址：
+    <textarea name="" id="addresses" cols="30" rows="10">
         0x1da770d53eBe21c79cebD9cb0C9ce885BeD251DC,0xc82D88971c1cC94c1e0821aDD449a4655C98E2BA
       </textarea>
-      金额：
-      <textarea name="" id="amounts" cols="30" rows="10">
+    金额：
+    <textarea name="" id="amounts" cols="30" rows="10">
         0.01,0.01
-    </textarea
-      >
-      <button data-method="sendMultTransaction">sendMultTransaction</button>
-    </div>
+    </textarea>
+    <button data-method="sendMultTransaction">sendMultTransaction</button>
+  </div>
 
-    <div>
-      <h1>合约地址调用ropsten合约地址</h1>
-      <input type="text" id="ropsten_contract_value" />
-      <button data-method="ropsten_contract_get">get</button>
-      <button data-method="ropsten_contract_set">set</button>
-    </div>
-
+  <div>
+    <h1>合约地址调用ropsten合约地址</h1>
+    <input type="text" id="ropsten_contract_value" />
+    <button data-method="ropsten_contract_get">get</button>
+    <button data-method="ropsten_contract_set">set</button>
+  </div>
 
 
-    <script type="module">
-      // import ethsss from   "./node_modules/@ethereumjs/tx/dist.browser/index.js"
-              // console.log(ethsss)
-              typeof VConsole != "undefined" && new VConsole();
 
-              function transfer16(val = 0) {
-                val = isNaN(Number(val)) ? 1 : Number(val);
-                return "0x" + val.toString(16);
+  <script type="module">
+    // import ethsss from   "./node_modules/@ethereumjs/tx/dist.browser/index.js"
+    // console.log(ethsss)
+    typeof VConsole != "undefined" && new VConsole();
+
+    function transfer16(val = 0) {
+      val = isNaN(Number(val)) ? 1 : Number(val);
+      return "0x" + val.toString(16);
+    }
+
+    const privateKey = ""
+    class Wallet {
+      constructor() {
+        this.state = {
+          address: "",
+          chainId: window.ethereum ? ethereum.chainId : "",
+        };
+        this.walletName = localStorage.walletName || "bitkeep";
+        this._config = {
+          supportNet: [{}],
+          // 代币合约
+          tokensCotractMap: {
+            128: {
+              "0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d": "usd", //正式
+              "0xf724f73F7800Fc0738daEa4f9e41627f97A0306C": "iwo", //正式
+            },
+            3: {
+              "0x26aad3cc577fbafb0d34054fdee860baccfc7eff": "ABC", // ropsten测试合约地址
+            },
+            97: {
+              "0x9Dd106f18836A54d2F9F5737cA6f64E02cEa72B1": "ABC", ///bsc 测试
+            },
+          },
+          //批量转账合约
+          multSendCotractMap: {
+            128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
+            3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", // ropsten测试合约地址
+            97: "0xd4df71086ccf309e3a9e8fcf11fa492709fb9305",
+          },
+
+          multSendCotract: "0xeeec4A9AAabD2382Fa2848DBC11C18c88D4e48ed",
+          // 批量转账合约 批量转账ropsten合约地址: 0xa8d73d4e771991e849284b7d2e6662632dffd368 || 0xeeec4A9AAabD2382Fa2848DBC11C18c88D4e48ed eth
+          // ht 0x6f7b49ea570a9aeb19d95dda6268fb35263561c2
+          //  bsc  0xd4df71086ccf309e3a9e8fcf11fa492709fb9305   97   //测试网络地址
+          // error
+          // multSendCotract: "0xB43a99281a63CB861F8C2ef8b0e0D3C74B74Dd3F", // 批量转账合约地址
+
+          ropsten: {
+            // demo_cotract: "0x5bd946e4533ad00df7b03613004e572b7676160c", // ropsten测试合约地址
+            // demo_cotract: "0xdbB01720978900A9aa1456F0F6bB925945FA106e", // ropsten测试合约地址
+            demo_cotract: "0x229039a868F057Ff48A5bB85e93370680fAc41a5", // heco测试合约地址
+          },
+        };
+      }
+
+      get chainId() {
+        return this.state.chainId;
+      }
+      set chainId(chainId) {
+        this.state.chainId = transfer16(chainId);
+        document.querySelector("#chainId").value = String(this.state.chainId);
+      }
+      get selectedAddress() {
+        return this.state.address;
+      }
+      set selectedAddress(val) {
+        this.state.address = val;
+        document.querySelector("#account").innerHTML = this.state.address;
+        document.querySelector("#from").value = this.state.address;
+        document.querySelector("#to").value = this.state.address;
+
+      }
+
+      get walletName() {
+        return this._walletName;
+      }
+      set walletName(val) {
+        localStorage.walletName = val
+        if (this._walletName != val) {
+          // this.provider && this.provider.removeAllListeners();
+          this.selectedAddress = "";
+        }
+        this._walletName = val || "bitkeep";
+        const walletBtn = document.querySelector("button[data-method='changeWalelt']");
+        walletBtn.innerText = val;
+        walletBtn.setAttribute("data-value", val);
+      }
+      get provider() {
+        switch (this.walletName) {
+          case "bitkeep":
+            return window.bitkeep && window.bitkeep.ethereum;
+            break;
+          case "injected":
+            return window.ethereum;
+
+          case "BinanceChain": // 只是测试和ethereum 不完全 相同
+            return window.BinanceChain;
+          default:
+            break;
+        }
+      }
+      isInstall() {
+        return !!this.provider;
+      }
+
+      async switchChain(chainId) {
+        chainId = transfer16(chainId);
+        try {
+          await this.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
+        } catch (error) {
+
+          console.log("wallet_addEthereumChain", error.code, error);
+          error.code === 4902 && await this.provider.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                blockExplorerUrls: ["https://moonriver.moonscan.io"],
+                iconUrls: [],
+                chainId: "0x12313123123",
+                chainName: "etherfair",
+                rpcUrls: ["https://rpc.etherfair.org"],
+                nativeCurrency: {
+                  name: "test",
+                  symbol: "test",
+                  decimals: 18,
+                },
+              },
+            ],
+          });
+        }
+      }
+      async connect() {
+        const r = await this.provider.request({ method: "eth_requestAccounts" }); // 授权
+        this.web3 = new Web3(this.provider);
+        const [address] = await this.web3.eth.getAccounts();
+        const chainId = await this.web3.eth.getChainId();
+
+        // const [address] = await this.provider.request({ method: "eth_accounts" });
+        // const chainId = await this.provider.request({ method: "eth_chainId" });
+        this.selectedAddress = address;
+        this.chainId = chainId;
+        this.initEvent();
+      }
+      initEvent() {
+        // this.provider && this.provider.removeAllListeners();
+        this.provider.on("accountsChanged", ([address]) => {
+
+          this.selectedAddress = address;
+        });
+        this.provider.on("chainChanged", async (chainId) => {
+
+          // chainId = await this.web3.eth.getChainId();
+          chainId = await this.provider.request({ method: "eth_chainId" });
+          this.chainId = chainId;
+        });
+      }
+      async request() {
+        return this.provider.request(...arguments);
+      }
+
+      async sign() {
+        return await web3.eth.sign(web3.utils.sha3(123132131), this.selectedAddress);
+      }
+      // 广播已经交易的签名
+      async sendSignedTransaction() {
+        // var Tx = require("@ethereumjs/tx").Transaction;
+        // var privateKey = Buffer.from("", "hex");
+        // var rawTx = {
+        //   nonce: "0x00",
+        //   gasPrice: "0x09184e72a000",
+        //   gasLimit: "0x2710",
+        //   to: "0x0000000000000000000000000000000000000000",
+        //   value: "0x00",
+        //   data: "0x7f7465737432000000000000000000000000000000000000000000000000000000600057",
+        // };
+        // var tx = new Tx(rawTx, { chain: "ropsten" });
+        // tx.sign(privateKey);
+        // var serializedTx = tx.serialize();
+        // // console.log(serializedTx.toString('hex'));
+        // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
+      }
+      //getfee 
+      async getFee(data) {
+        const { web3 } = this
+        const isEip1559 = data.type == 0
+
+        let baseFeePerGas,
+          maxPriorityFeePerGas,
+          maxFeePerGas,
+          PriorityFee = 1.5
+
+        if (data.contract) {
+          const Erc20APIContract = new this.web3.eth.Contract(Erc20API, data.contract, { from: this.selectedAddress });
+          const decimalCall = Erc20APIContract.methods.decimals || Erc20APIContract.methods.DECIMALS;
+          const decimals = await decimalCall().call();
+          const value = String(data.value * 10 ** decimals);
+          data.to = data.contract
+          data.value = "0x0"
+          data.data = await Erc20APIContract.methods.transfer(data.to, value).encodeABI({ from: this.selectedAddress, value: 0 })
+        }
+
+        const gasPrice = await web3.eth.getGasPrice();
+        const gasLimit = await web3.eth.estimateGas({ from: data.from, to: data.to, value: data.value, data: data.data })
+
+
+        if (isEip1559) {
+          let block = await this.web3.eth.getBlock('latest')
+          baseFeePerGas = block.baseFeePerGas
+          maxPriorityFeePerGas = PriorityFee * 10 ** 18
+          maxFeePerGas = baseFeePerGas * 1.5
+        }
+
+        async function calculate1559GasFee(gasPrice, baseFee, gasLimit, tip) {
+          try {
+            const weiGasPrice = web3.utils.toWei(gasPrice, 'gwei');
+            const weiBaseFee = web3.utils.toWei(baseFee, 'gwei');
+            const weiGasLimit = web3.utils.toBN(gasLimit);
+            const weiTip = web3.utils.toWei(tip, 'ether');
+            const maxPriorityFeePerGas = weiGasPrice.sub(weiBaseFee).add(weiTip);
+            const total1559GasFee = weiBaseFee.mul(weiGasLimit).add(maxPriorityFeePerGas.mul(weiGasLimit));
+            const gasFee = web3.utils.fromWei(total1559GasFee, 'ether');
+            return gasFee;
+          } catch (error) {
+            console.error('计算1559的Gas Fee时出错：', error);
+          }
+        }
+
+
+
+        return {
+          fee1559: await calculate1559GasFee(gasPrice, baseFeePerGas, gasLimit, PriorityFee),
+          isEip1559: isEip1559,
+          gasPrice: gasPrice,
+          gasLimit,
+          baseFeePerGas,
+          maxPriorityFeePerGas,
+          maxFeePerGas
+        }
+      }
+      //签名交易并且在wallet 中广播
+      async sendTransaction(data) {
+
+        const isEip1559 = data.type == 0
+
+
+        let baseFeePerGas = null
+        let maxPriorityFeePerGas = null
+        let maxFeePerGas = null
+        let gas1559Fee = null
+        let PriorityFee = 1.5
+        if (isEip1559) {
+
+          let block = await this.web3.eth.getBlock('latest')
+          baseFeePerGas = block.baseFeePerGas
+          maxPriorityFeePerGas = ethers.utils.parseUnits(String(PriorityFee), 'gwei')
+          maxFeePerGas = ethers.utils.parseUnits(String(baseFeePerGas * 2), 'gwei')
+
+        }
+        if (data.contract) {
+          const Erc20APIContract = new this.web3.eth.Contract(Erc20API, data.contract, {
+            from: this.selectedAddress,
+            // gasLimit: 70000,
+            // gasPrice: 1000000000,
+            // de
+          });
+
+
+
+          const decimalCall = Erc20APIContract.methods.decimals || Erc20APIContract.methods.DECIMALS;
+
+
+
+          // const delayMillisecond= (function() {
+          //       let delayTime = new Date().getTime()
+          //       return function (context, ...arg) {
+          //         let nowTime = new Date().getTime()
+          //         while(nowTime - delayTime<=0){
+          //            nowTime = new Date().getTime()
+          //         }
+          //         delayTime = nowTime
+          //         return  context
+          //       }
+          // })()
+
+
+          const decimals = await decimalCall().call();
+          const value = String(data.value * 10 ** decimals);
+          // decimals >>> 313ce567
+          // await this.provider.request({"method":"eth_call","params":[{"data":"0x313ce567","to":"0xde9ff9ab0d042aede7bff0de61d50e272bd08eab"},'latest']})
+
+          const result = await Erc20APIContract.methods.transfer(data.to, value).send({ from: this.selectedAddress, value: 0 });
+          return result.transactionHash;
+
+          // const decimals = await this.provider.request({ method: "eth_call", params: [{ data: "0x313ce567", to: "0xde9ff9ab0d042aede7bff0de61d50e272bd08eab" }, "latest"] });
+
+          // let value =  Number(data.value * 10 ** Number(decimals)).toString(16);
+          // let to = new Array(64 -(data.to.substr(2)).length).fill(0).join("") +data.to.substr(2);
+          // value = new Array(64 - value.length).fill(0).join("") + value;
+
+          // const params = {
+          //   from: this.selectedAddress,
+          //   chainId: this.chainId,
+          //   data: `0xa9059cbb${to}${value}`,
+          //   to: data.contract, //
+          //   value: "0x0",
+          // };
+
+          // const result = await window.this.provider.request({ method: "eth_sendTransaction", params: [params] });
+
+          // 0xa9059cbb  >> transfer
+          // 00000000000000000000000044f0b22e13acbc9ccc6810d4dd7f6d87206ebe64 >> to地址
+          // 0000000000000000000000000000000000000000000000000de0b6b3a7640000 >> 转账金额
+          // await window.this.provider.request({ method: 'eth_sendTransaction',
+          //       params: [
+          //           {
+          //             from: "" ,
+          //             to: id,
+          //             chainId: this.chainId,
+          //             data: ""
+
+          //        }]
+          // })
+
+          return result;
+        } else {
+          const result = await this.web3.eth.sendTransaction({
+            from: data.from,
+            to: data.to, // 和那个地址或者合约进行交互
+            value: this.web3.utils.toWei(data.value, "ether"), //主币
+          })
+
+          // const result = await this.provider.request({
+          //   method: "eth_sendTransaction",
+          //   params: [
+          //     {
+          //       from: data.from,
+          //       to: data.to, // 和那个地址或者合约进行交互
+          //       value: "0x" + Number(data.value * 10 ** Number(18)).toString(16), //主币
+          //       maxFeePerGas: "0xcd46add9c",
+          //       maxPriorityFeePerGas: "0x9502F900",
+          //       // value: "0x5af3107a4000"
+          //     },
+          //   ],
+          // });
+
+          return result;
+        }
+      }
+      async signTransaction(data) {
+   
+        const web3HttpProvider = new Web3("https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8")
+        const value = ethers.utils.parseEther('0.00001')
+        const gasPrice = await web3HttpProvider.eth.getGasPrice();
+        const gasLimit = await web3HttpProvider.eth.estimateGas({ from: this.selectedAddress, to: data.to, value: value, data: data.data || '0x' })
+        const nonce = await web3HttpProvider.eth.getTransactionCount(this.selectedAddress)
+
+  
+        const tx = {
+          from
+            :
+            "0xb7e2700fc794509df1b4a4dbe6a997caa425f568",
+          maxFeePerGas
+            :
+            "0xf7acdbc70",
+          maxPriorityFeePerGas
+            :
+            "0x9502F900",
+          to
+            :
+            "0xb7e2700fc794509df1b4a4dbe6a997caa425f568",
+          value
+            :
+            "0x5af3107a4000"
+        }
+        const result = await this.provider.request({
+          method: "eth_signTransaction",
+          params: [
+            tx
+          ],
+        });
+
+        return result;
+      }
+      async ethSignTransaction(data) {
+        const isEip1559 = data.type == 0
+
+
+        let baseFeePerGas = null
+        let maxPriorityFeePerGas = null
+        let maxFeePerGas = null
+        let gas1559Fee = null
+        let PriorityFee = 1.5
+        if (isEip1559) {
+
+          let block = await this.web3.eth.getBlock('latest')
+
+          baseFeePerGas = block.baseFeePerGas
+          maxPriorityFeePerGas = ethers.utils.parseUnits(String(PriorityFee), 'gwei')
+          maxFeePerGas = ethers.utils.parseUnits(String(baseFeePerGas * 2), 'gwei')
+
+        }
+        if (data.contract) {
+          // const Erc20APIContract = new this.web3.eth.Contract(Erc20API, data.contract, {
+          //   from: this.selectedAddress,
+          //   // gasLimit: 70000,
+          //   // gasPrice: 1000000000,
+          //   // de
+          // });
+
+
+
+          // const decimalCall = Erc20APIContract.methods.decimals || Erc20APIContract.methods.DECIMALS;
+
+
+
+
+          // const decimals = await decimalCall().call();
+          // const value = String(data.value * 10 ** decimals);
+          // const data = await Erc20APIContract.methods.transfer(data.to, value).send({ from: this.selectedAddress, value: 0 }).encodeABI()
+
+
+          // const transaction = {
+          //   from: data.from,
+          //   to: data.to, // 和那个地址或者合约进行交互
+          //   value: "0x",//主币
+          //   gasLimit: '22000',
+          //   // maxFeePerGas: maxFeePerGas,
+          //   // maxPriorityFeePerGas: maxPriorityFeePerGas,
+          //   data: data,
+          //   // nonce: 1,
+          //   // type: 2,
+          //   // chainId: this.chainId, // 31337
+          // }
+
+          // let serializedTransaction = await ethers.utils.serializeTransaction(transaction)
+          // let hash = ethers.utils.keccak256(serializedTransaction)
+          // const result = await this.provider.request({
+          //   method: "eth_sign",
+          //   params: [
+          //     this.selectedAddress,
+          //     hash
+          //   ],
+          // });
+
+
+          // // let signingKey = new ethers.utils.SigningKey(privateKey)
+          // // let signature = await signingKey.signDigest(hash)
+          // console.log(result, signature)
+
+
+        } else {
+
+
+
+          // to?: string;
+          // nonce?: number;
+
+          // gasLimit?: BigNumberish;
+          // gasPrice?: BigNumberish;
+
+          // data?: BytesLike;
+          // value?: BigNumberish;
+          // chainId?: number;
+
+          // // Typed-Transaction features
+          // type?: number | null;
+
+          // // EIP-2930; Type 1 & EIP-1559; Type 2
+          // accessList?: AccessListish;
+
+          // // EIP-1559; Type 2
+          // maxPriorityFeePerGas?: BigNumberish;
+          // maxFeePerGas?: BigNumberish;
+          const web3HttpProvider = new Web3("https://mainnet.infura.io/v3/b6bf7d3508c941499b10025c0776eaf8")
+          const value = ethers.utils.parseEther('0.00001')
+          const gasPrice = await web3HttpProvider.eth.getGasPrice();
+          const gasLimit = await web3HttpProvider.eth.estimateGas({ from: this.selectedAddress, to: data.to, value: value, data: data.data || '0x' })
+          const nonce = await web3HttpProvider.eth.getTransactionCount(this.selectedAddress)
+
+          // const transaction = {
+          //   // from: this.selectedAddress,
+          //   to: data.to, // 和那个地址或者合约进行交互
+          //   value: value,
+          //   gasLimit: "0x" + Number(gasLimit).toString(16),
+          //   gasPrice: "0x" + Number(gasPrice).toString(16),
+
+          //   // maxPriorityFeePerGas: ethers.utils.parseUnits('5', 'gwei'),
+          //   data: "0x",
+          //   nonce: "0x" + Number(nonce).toString(16),
+          //   type: null,
+          //   // chainId: this.chainId, // 31337
+          // }
+
+
+          const tx = {
+            // from: this.selectedAddress,
+            maxFeePerGas: "0xf7acdbc70",
+            maxPriorityFeePerGas: "0x9502F900",
+            to: data.to, // 和那个地址或者合约进行交互
+            value: value,
+            gasLimit: "0x" + Number(gasLimit).toString(16),
+            gasPrice: null, // ethers.utils.parseUnits(String(gasPrice), 'wei')._hex,
+            nonce: "0x" + Number(nonce).toString(16),
+            type: 2,
+            chainId: this.chainId
+          }
+
+    
+    
+          console.log("tx", tx, transaction)
+
+          let serializedTransaction = await ethers.utils.serializeTransaction(tx)
+          let hash = ethers.utils.keccak256(serializedTransaction)
+          const sined = await this.provider.request({
+            method: "eth_sign",
+            params: [
+              this.selectedAddress,
+              hash
+            ],
+          });
+
+
+
+
+          let serializedTransaction2 = await ethers.utils.serializeTransaction(tx, sined)
+
+
+          // let wallet = new ethers.Wallet(privateKey)
+          // let signedTransaction = await wallet.signTransaction(transaction)
+          // let signingKey = new ethers.utils.SigningKey(privateKey)
+          // let signature = await signingKey.signDigest(hash)
+
+
+
+          console.log({
+            // result,
+            serializedTransaction2
+            // signature, 
+            // signedTransaction
+          })
+          return serializedTransaction2;
+        }
+      }
+      //批量转账
+      async sendMultTransaction(data) {
+        let { addresses, mltcontract, contract } = data;
+        //代币的精度是是需要重新获取的
+        const { allAmount, amounts } = data.amounts.reduce(
+          (total, num) => {
+            let etherVal = this.web3.utils.toWei(num, "ether");
+            total.amounts.push(etherVal);
+            total.allAmount = etherVal - 0 + total.allAmount;
+            return total;
+          },
+          {
+            allAmount: 0,
+            amounts: [],
+          }
+        );
+
+        //abi 作用只是为了方便调用 方法调用更加可读 abi也是可以不需要的
+        //MultContract.methods.multisendToken  == MultContract.methods[0x0b66f3f5]
+        const MultContract = new this.web3.eth.Contract(poolABI, mltcontract || this._config.multSendCotract, {
+          from: this.selectedAddress,
+        });
+
+        if (contract) {
+          const Erc20APIContract = new this.web3.eth.Contract(Erc20API, contract, { from: this.selectedAddress });
+
+          const approveNum = await Erc20APIContract.methods.allowance(this.selectedAddress, mltcontract).call();
+          if (approveNum < allAmount) {
+            const approveTxid = await Erc20APIContract.methods.approve(mltcontract, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").send({
+              from: this.selectedAddress,
+              to: contract,
+              value: 0,
+              maxPriorityFeePerGas: null,
+              maxFeePerGas: null
+            });
+            console.log({ approveTxid });
+          }
+        }
+
+        // 第一种
+        // call查询数据不上链  send上链需要fee   encodeABI 编译成进制码64位没有其他操作
+        // MultContract.methods.multisendToken == MultContract.methods[0x0b66f3f5];
+        // const resultData = await MultContract.methods.multisendToken(contract || "0x000000000000000000000000000000000000bEEF", addresses, amounts).send({
+        //   from: this.selectedAddress,
+        //   // gas: "",
+        //   value: contract ? 0 : allAmount,
+        // });
+        // return resultData.transactionHash;
+
+        // 第2中
+        // debugger
+        // 0x0b66f3f5
+        // 0000000000000000000000002ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d
+
+        // 0000000000000000000000000000000000000000000000000000000000000060
+        // 00000000000000000000000000000000000000000000000000000000000000c0
+        // 0000000000000000000000000000000000000000000000000000000000000002
+        // 0000000000000000000000001da770d53ebe21c79cebd9cb0c9ce885bed251dc
+        // 000000000000000000000000c82d88971c1cc94c1e0821add449a4655c98e2ba
+
+        // 0000000000000000000000000000000000000000000000000000000000000002
+        // 000000000000000000000000000000000000000000000000002386f26fc10000
+        // 000000000000000000000000000000000000000000000000002386f26fc10000
+
+        const resultData = await MultContract.methods.multisendToken(data.contract || "0x000000000000000000000000000000000000bEEF", addresses, amounts).encodeABI();
+
+        const tranferData = {
+          from: this.provider.selectedAddress,
+          to: data.mltcontract || this._config.multSendCotract, //(可选）交易消息的目标地址，如果是合约创建，则不填.
+          value: String(data.contract ? 0 : allAmount),
+          data: resultData,
+
+          // gas: 300000,
+        };
+
+        // const txid  =  await  ethereum.request({method:"eth_sendTransaction", params:[tranferData]})
+
+        const txid = await this.web3.eth.sendTransaction(tranferData);
+        // console.log("result",{ resultData, tranferData,txid  });
+        return txid.transactionHash;
+      }
+    }
+
+    //ui btn click
+    const btnsMethods = Array.from(document.querySelectorAll("button[data-method]"));
+    btnsMethods.forEach((el) => {
+      el.onclick = async function (event) {
+        const { method } = event.target.dataset;
+        switch (method) {
+          case "personal_sign":
+            if (true) {
+              document.querySelector("#personal_sign_result").value = await wallet.request({ method: "personal_sign", params: [document.querySelector("#personal_sign").value, wallet.selectedAddress], from: wallet.selectedAddress });
+            }
+
+            break;
+
+          case "fee_get":
+            if (true) {
+              const fee_get_result = document.querySelector("#fee_get_result")
+              fee_get_result.value = JSON.stringify(await wallet.getFee({
+                from: document.querySelector("#from").value,
+                to: document.querySelector("#to").value,
+                value: document.querySelector("#amount").value,
+                contract: document.querySelector("#contract").value,
+                type: document.querySelector("#transferType").selectedIndex
+              }), null, 2)
+            }
+
+            break;
+          case "changeWalelt":
+            if (true) {
+              switch (wallet.walletName) {
+                case "bitkeep":
+                  wallet.walletName = "injected"
+                  break;
+                case "injected":
+                  wallet.walletName = "BinanceChain"
+                  break;
+                default:
+                  wallet.walletName = "bitkeep"
+                  break;
+              }
+            }
+            break;
+          case "connect":
+            await wallet.connect();
+            // await wallet.switchChain(128);
+            break;
+          case "sign":
+            console.log("sign", await wallet.sign());
+            break;
+          case "wallet_switchEthereumChain":
+            wallet.switchChain(document.querySelector("#chainId").value);
+            break;
+          case "sendTransaction":
+            const txid = await wallet.sendTransaction({
+              from: document.querySelector("#from").value,
+              to: document.querySelector("#to").value,
+              value: document.querySelector("#amount").value,
+              contract: document.querySelector("#contract").value,
+              type: document.querySelector("#transferType").selectedIndex
+            });
+            alert(txid);
+            break;
+          case "sign_Transaction":
+            const signed = await wallet.signTransaction({
+              from: document.querySelector("#from").value,
+              to: document.querySelector("#to").value,
+              value: document.querySelector("#amount").value,
+              contract: document.querySelector("#contract").value,
+              type: document.querySelector("#transferType").selectedIndex
+            });
+            alert(signed);
+            break;
+          case "eth_sign":
+            const txid1 = await wallet.ethSignTransaction({
+              from: document.querySelector("#from").value,
+              to: document.querySelector("#to").value,
+              value: document.querySelector("#amount").value,
+              contract: document.querySelector("#contract").value,
+              type: document.querySelector("#transferType").selectedIndex
+            });
+
+            alert(txid1);
+            break;
+          case "sendMultTransaction":
+            let addresses = document.querySelector("#addresses").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
+            addresses = addresses.split(",");
+            let amounts = document.querySelector("#amounts").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
+            amounts = amounts.split(",");
+            let mltcontract = document.querySelector("#mltcontract").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
+            let mltTokencontract = document.querySelector("#mltTokencontract").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
+
+            const sendMultTransactionTxid = await wallet.sendMultTransaction({
+              from: this.address,
+              addresses,
+              amounts,
+              contract: mltTokencontract,
+              mltcontract: mltcontract,
+            });
+            alert(sendMultTransactionTxid);
+            break;
+          case "ropsten_contract_set":
+          case "ropsten_contract_get":
+            const DemoContract = new wallet.web3.eth.Contract(DemoAbi, wallet._config.ropsten.demo_cotract, { from: wallet.selectedAddress });
+            if (method == "ropsten_contract_set") {
+              await DemoContract.methods.setabcdefe(document.querySelector("#ropsten_contract_value").value || 0).send({ from: wallet.selectedAddress });
+            } else {
+              document.querySelector("#ropsten_contract_value").value = await DemoContract.methods.getabcdefe().call();
+            }
+            break;
+
+          case "transaction_send":
+            if (true) {
+              const transaction_result = document.querySelector("#transaction_result")
+              const transaction_txid = document.querySelector("#transaction_params")
+              const transaction_rpc = document.querySelector("#transaction_rpc")
+              const result = await fetch(transaction_rpc.value, {
+                method: "POST",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                // mode:"cors",
+                body: JSON.stringify(
+                  {
+                    "jsonrpc": "2.0",
+                    "method": "eth_sendRawTransaction",
+                    "params": [transaction_txid.value],
+                    "id": 0
+                  }
+                ),
+              })
+                .then((response) => response.json())
+                .catch((error) => {
+                  return error
+                });
+              transaction_result.value = typeof result == 'object' ? JSON.stringify(result, null, 2) : result
+            }
+            break;
+          case "parseTransaction_parse":
+            if (true) {
+              const parseTransaction_params = document.querySelector("#parseTransaction_params")
+              const parseTransaction_result = document.querySelector("#parseTransaction_result")
+              let result = ''
+              try {
+                result = ethers.utils.parseTransaction(parseTransaction_params.value)
+              } catch (error) {
+                result = error
               }
 
-              class Wallet {
-                constructor() {
-                  this.state = {
-                    address: "",
-                    chainId: window.ethereum ? ethereum.chainId : "",
-                  };
-                  this._walletName = "bitkeep";
-                  this._config = {
-                    supportNet: [{}],
-                    // 代币合约
-                    tokensCotractMap: {
-                      128: {
-                        "0x2ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d": "usd", //正式
-                        "0xf724f73F7800Fc0738daEa4f9e41627f97A0306C": "iwo", //正式
-                      },
-                      3: {
-                        "0x26aad3cc577fbafb0d34054fdee860baccfc7eff": "ABC", // ropsten测试合约地址
-                      },
-                      97: {
-                        "0x9Dd106f18836A54d2F9F5737cA6f64E02cEa72B1": "ABC", ///bsc 测试
-                      },
-                    },
-                    //批量转账合约
-                    multSendCotractMap: {
-                      128: "0x6f7b49ea570a9aeb19d95dda6268fb35263561c2", //正式
-                      3: "0xa8d73d4e771991e849284b7d2e6662632dffd368", // ropsten测试合约地址
-                      97: "0xd4df71086ccf309e3a9e8fcf11fa492709fb9305",
-                    },
+              parseTransaction_result.value = typeof result == 'string' ? result : JSON.stringify(result, null, 2)
+            }
 
-                    multSendCotract: "0xeeec4A9AAabD2382Fa2848DBC11C18c88D4e48ed",
-                    // 批量转账合约 批量转账ropsten合约地址: 0xa8d73d4e771991e849284b7d2e6662632dffd368 || 0xeeec4A9AAabD2382Fa2848DBC11C18c88D4e48ed eth
-                    // ht 0x6f7b49ea570a9aeb19d95dda6268fb35263561c2
-                    //  bsc  0xd4df71086ccf309e3a9e8fcf11fa492709fb9305   97   //测试网络地址
-                    // error
-                    // multSendCotract: "0xB43a99281a63CB861F8C2ef8b0e0D3C74B74Dd3F", // 批量转账合约地址
+            break;
 
-                    ropsten: {
-                      // demo_cotract: "0x5bd946e4533ad00df7b03613004e572b7676160c", // ropsten测试合约地址
-                      // demo_cotract: "0xdbB01720978900A9aa1456F0F6bB925945FA106e", // ropsten测试合约地址
-                      demo_cotract: "0x229039a868F057Ff48A5bB85e93370680fAc41a5", // heco测试合约地址
-                    },
-                  };
-                }
 
-                get chainId() {
-                  return this.state.chainId;
-                }
-                set chainId(chainId) {
-                  this.state.chainId = chainId;
-                  document.querySelector("#chainId").value = String(this.state.chainId);
-                }
-                get selectedAddress() {
-                  return this.state.address;
-                }
-                set selectedAddress(val) {
-                  this.state.address = val;
-                  document.querySelector("#account").innerHTML = this.state.address;
-                  document.querySelector("#from").value = this.state.address;
-                }
-
-                get walletName() {
-                  return this._walletName;
-                }
-                set walletName(val) {
-                  if (this._walletName != val) {
-                    this.provider && this.provider.removeAllListeners();
-                    this.selectedAddress = "";
+          case "transaction_search":
+            if (true) {
+              const transaction_result = document.querySelector("#transaction_search_result")
+              const transaction_txid = document.querySelector("#transaction_search_params")
+              const transaction_rpc = document.querySelector("#transaction_search_rpc")
+              const result = await fetch(transaction_rpc.value, {
+                method: "POST",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                // mode:"cors",
+                body: JSON.stringify(
+                  {
+                    "jsonrpc": "2.0",
+                    "method": "eth_getTransactionByHash",
+                    "params": [transaction_txid.value],
+                    "id": 0
                   }
-                  this._walletName = val || "bitkeep";
-                  const walletBtn = document.querySelector("button[data-method='changeWalelt']");
-                  walletBtn.innerText = val;
-                  walletBtn.setAttribute("data-value", val);
-                }
-                get provider() {
-                  switch (this.walletName) {
-                    case "bitkeep":
-                      return window.bitkeep && window.bitkeep.ethereum;
-                      break;
-                    case "injected":
-                      return window.ethereum;
-                    default:
-                      break;
-                  }
-                }
-                isInstall() {
-                  return !!this.provider;
-                }
-
-                async switchChain(chainId) {
-                  chainId = transfer16(chainId);
-                  try {
-                    await this.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
-                  } catch (error) {
-                   
-                    console.log("wallet_addEthereumChain", error.code, error);
-                    error.code === 4902 &&  await this.provider.request({
-                      method: "wallet_addEthereumChain",
-                      params: [
-                        {
-                          blockExplorerUrls: ["https://moonriver.moonscan.io"],
-                          iconUrls: [],
-                          chainId: "0x12313123123",
-                          chainName: "etherfair",
-                          rpcUrls: ["https://rpc.etherfair.org"],
-                          nativeCurrency: {
-                            name: "test",
-                            symbol: "test",
-                            decimals: 18,
-                          },
-                        },
-                      ],
-                    });
-                  }
-                }
-                async connect() {
-                  try {
-                    const r = await this.provider.request({ method: "eth_requestAccounts" }); // 授权
-                  } catch (error) {
-                    console.log(error);
-                  }
-
-                  this.web3 = new Web3(this.provider);
-                  const [address] = await this.web3.eth.getAccounts();
-                  const chainId = await this.web3.eth.getChainId();
-
-                  // const [address] = await this.provider.request({ method: "eth_accounts" });
-                  // const chainId = await this.provider.request({ method: "eth_chainId" });
-                  this.selectedAddress = address;
-                  this.chainId = chainId;
-                  this.initEvent();
-                }
-                initEvent() {
-                  this.provider && this.provider.removeAllListeners();
-                  this.provider.on("accountsChanged", ([address]) => {
-                    this.selectedAddress = address;
-                  });
-                  this.provider.on("chainChanged", async (chainId) => {
-                    // chainId = await this.web3.eth.getChainId();
-                    chainId = await this.provider.request({ method: "eth_chainId" });
-                    this.chainId = chainId;
-                  });
-                }
-                async request() {
-                  return this.provider.request(...arguments);
-                }
-                async sign() {
-                  return await web3.eth.sign(web3.utils.sha3(123132131), this.selectedAddress);
-                }
-                // 广播已经交易的签名
-                async sendSignedTransaction() {
-                  // var Tx = require("@ethereumjs/tx").Transaction;
-                  // var privateKey = Buffer.from("e331b6d69882b4cb4ea581d88e0b604039a3de5967688d3dcffdd2270c0fd109", "hex");
-                  // var rawTx = {
-                  //   nonce: "0x00",
-                  //   gasPrice: "0x09184e72a000",
-                  //   gasLimit: "0x2710",
-                  //   to: "0x0000000000000000000000000000000000000000",
-                  //   value: "0x00",
-                  //   data: "0x7f7465737432000000000000000000000000000000000000000000000000000000600057",
-                  // };
-                  // var tx = new Tx(rawTx, { chain: "ropsten" });
-                  // tx.sign(privateKey);
-                  // var serializedTx = tx.serialize();
-                  // // console.log(serializedTx.toString('hex'));
-                  // // 0xf889808609184e72a00082271094000000000000000000000000000000000000000080a47f74657374320000000000000000000000000000000000000000000000000000006000571ca08a8bbf888cfa37bbf0bb965423625641fc956967b81d12e23709cead01446075a01ce999b56a8a88504be365442ea61239198e23d1fce7d00fcfc5cd3b44b7215f
-                }
-
-                //签名交易并且在wallet 中广播
-                async sendTransaction(data) {
-                  if (data.contract) {
-                    const Erc20APIContract = new this.web3.eth.Contract(Erc20API, data.contract, {
-                      from: this.selectedAddress,
-                      // gasLimit: 70000,
-                      // gasPrice: 1000000000,
-                      // de
-                    });
-
-                    const decimalCall = Erc20APIContract.methods.decimals || Erc20APIContract.methods.DECIMALS;
-                    const decimals = await decimalCall().call();
-                    const value = String(data.value * 10 ** decimals);
-                    // decimals >>> 313ce567
-                    // await this.provider.request({"method":"eth_call","params":[{"data":"0x313ce567","to":"0xde9ff9ab0d042aede7bff0de61d50e272bd08eab"},'latest']})
-
-                    const result = Erc20APIContract.methods.transfer(data.to, value).send({ from: this.selectedAddress, value: 0 });
-                    return result.transactionHash;
-
-                    // const decimals = await this.provider.request({ method: "eth_call", params: [{ data: "0x313ce567", to: "0xde9ff9ab0d042aede7bff0de61d50e272bd08eab" }, "latest"] });
-
-                    // let value =  Number(data.value * 10 ** Number(decimals)).toString(16);
-                    // let to = new Array(64 -(data.to.substr(2)).length).fill(0).join("") +data.to.substr(2);
-                    // value = new Array(64 - value.length).fill(0).join("") + value;
-
-                    // const params = {
-                    //   from: this.selectedAddress,
-                    //   chainId: this.chainId,
-                    //   data: `0xa9059cbb${to}${value}`,
-                    //   to: data.contract, //
-                    //   value: "0x0",
-                    // };
-
-                    // const result = await window.this.provider.request({ method: "eth_sendTransaction", params: [params] });
-
-                    // 0xa9059cbb  >> transfer
-                    // 00000000000000000000000044f0b22e13acbc9ccc6810d4dd7f6d87206ebe64 >> to地址
-                    // 0000000000000000000000000000000000000000000000000de0b6b3a7640000 >> 转账金额
-                    // await window.this.provider.request({ method: 'eth_sendTransaction',
-                    //       params: [
-                    //           {
-                    //             from: "" ,
-                    //             to: id,
-                    //             chainId: this.chainId,
-                    //             data: ""
-
-                    //        }]
-                    // })
-
-                    return result;
-                  } else {
-                    const result = await this.web3.eth.sendTransaction({
-                      from: data.from,
-                      to: data.to, // 和那个地址或者合约进行交互
-                      value: this.web3.utils.toWei(data.value, "ether"), //主币
-                    })
-                    // const result = await this.provider.request({
-                    //   method: "eth_sendTransaction",
-                    //   params: [
-                    //     {
-                    //       from: data.from,
-                    //       to: data.to, // 和那个地址或者合约进行交互
-                    //       value: "0x" + Number(data.value * 10 ** Number(18)).toString(16), //主币
-                    //     },
-                    //   ],
-                    // });
-
-                    return result;
-                  }
-                }
-                //批量转账
-                async sendMultTransaction(data) {
-                  let { addresses, mltcontract, contract } = data;
-                  //代币的精度是是需要重新获取的
-                  const { allAmount, amounts } = data.amounts.reduce(
-                    (total, num) => {
-                      let etherVal = this.web3.utils.toWei(num, "ether");
-                      total.amounts.push(etherVal);
-                      total.allAmount = etherVal - 0 + total.allAmount;
-                      return total;
-                    },
-                    {
-                      allAmount: 0,
-                      amounts: [],
-                    }
-                  );
-
-                  //abi 作用只是为了方便调用 方法调用更加可读 abi也是可以不需要的
-                  //MultContract.methods.multisendToken  == MultContract.methods[0x0b66f3f5]
-                  const MultContract = new this.web3.eth.Contract(poolABI, mltcontract || this._config.multSendCotract, {
-                    from: this.selectedAddress,
-                  });
-
-                  if (contract) {
-                    const Erc20APIContract = new this.web3.eth.Contract(Erc20API, contract, { from: this.selectedAddress });
-
-                    const approveNum = await Erc20APIContract.methods.allowance(this.selectedAddress, mltcontract).call();
-                    if (approveNum < allAmount) {
-                      const approveTxid = await Erc20APIContract.methods.approve(mltcontract, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").send({
-                        from: this.selectedAddress,
-                        to: contract,
-                        value: 0,
-                      });
-                      console.log({ approveTxid });
-                    }
-                  }
-
-                  // 第一种
-                  // call查询数据不上链  send上链需要fee   encodeABI 编译成进制码64位没有其他操作
-                  // MultContract.methods.multisendToken == MultContract.methods[0x0b66f3f5];
-                  // const resultData = await MultContract.methods.multisendToken(contract || "0x000000000000000000000000000000000000bEEF", addresses, amounts).send({
-                  //   from: this.selectedAddress,
-                  //   // gas: "",
-                  //   value: contract ? 0 : allAmount,
-                  // });
-                  // return resultData.transactionHash;
-
-                  // 第2中
-                  // debugger
-                  // 0x0b66f3f5
-                  // 0000000000000000000000002ae7cb4c8bbd1fd34edc3a93bf4a4eed8ea5d89d
-
-                  // 0000000000000000000000000000000000000000000000000000000000000060
-                  // 00000000000000000000000000000000000000000000000000000000000000c0
-                  // 0000000000000000000000000000000000000000000000000000000000000002
-                  // 0000000000000000000000001da770d53ebe21c79cebd9cb0c9ce885bed251dc
-                  // 000000000000000000000000c82d88971c1cc94c1e0821add449a4655c98e2ba
-
-                  // 0000000000000000000000000000000000000000000000000000000000000002
-                  // 000000000000000000000000000000000000000000000000002386f26fc10000
-                  // 000000000000000000000000000000000000000000000000002386f26fc10000
-
-                  const resultData = await MultContract.methods.multisendToken(data.contract || "0x000000000000000000000000000000000000bEEF", addresses, amounts).encodeABI();
-
-                  const tranferData = {
-                    from: this.provider.selectedAddress,
-                    to: data.mltcontract || this._config.multSendCotract, //(可选）交易消息的目标地址，如果是合约创建，则不填.
-                    value: String(data.contract ? 0 : allAmount),
-                    data: resultData,
-                    // gas: 300000,
-                  };
-
-                  // const txid  =  await  ethereum.request({method:"eth_sendTransaction", params:[tranferData]})
-
-                  const txid = await this.web3.eth.sendTransaction(tranferData);
-                  // console.log("result",{ resultData, tranferData,txid  });
-                  return txid.transactionHash;
-                }
-              }
-
-              //ui btn click
-              const btnsMethods = Array.from(document.querySelectorAll("button[data-method]"));
-              btnsMethods.forEach((el) => {
-                el.onclick = async function (event) {
-                  const { method } = event.target.dataset;
-                  switch (method) {
-                    case "personal_sign":
-                      if (true) {
-                        document.querySelector("#personal_sign_result").value = await wallet.request({ method: "personal_sign", params: [document.querySelector("#personal_sign").value, wallet.selectedAddress], from: wallet.selectedAddress });
-                      }
-
-                      break;
-                    case "changeWalelt":
-                      wallet.walletName = wallet.walletName == "bitkeep" ? "injected" : "bitkeep";
-                      break;
-                    case "connect":
-                      await wallet.connect();
-                      // await wallet.switchChain(128);
-                      break;
-                    case "sign":
-                      console.log("sign", await wallet.sign());
-                      break;
-                    case "wallet_switchEthereumChain":
-                      wallet.switchChain(document.querySelector("#chainId").value);
-                      break;
-                    case "sendTransaction":
-                      const txid = await wallet.sendTransaction({
-                        from: document.querySelector("#from").value,
-                        to: document.querySelector("#to").value,
-                        value: document.querySelector("#amount").value,
-                        contract: document.querySelector("#contract").value,
-                      });
-                      alert(txid);
-                      break;
-                    case "sendMultTransaction":
-                      let addresses = document.querySelector("#addresses").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
-                      addresses = addresses.split(",");
-                      let amounts = document.querySelector("#amounts").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
-                      amounts = amounts.split(",");
-                      let mltcontract = document.querySelector("#mltcontract").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
-                      let mltTokencontract = document.querySelector("#mltTokencontract").value.trim().replace(/ /g, "").replace(/\n\r/g, "");
-
-                      const sendMultTransactionTxid = await wallet.sendMultTransaction({
-                        from: this.address,
-                        addresses,
-                        amounts,
-                        contract: mltTokencontract,
-                        mltcontract: mltcontract,
-                      });
-                      alert(sendMultTransactionTxid);
-                      break;
-                    case "ropsten_contract_set":
-                    case "ropsten_contract_get":
-                      const DemoContract = new wallet.web3.eth.Contract(DemoAbi, wallet._config.ropsten.demo_cotract, { from: wallet.selectedAddress });
-                      if (method == "ropsten_contract_set") {
-                        await DemoContract.methods.setabcdefe(document.querySelector("#ropsten_contract_value").value || 0).send({ from: wallet.selectedAddress });
-                      } else {
-                        document.querySelector("#ropsten_contract_value").value = await DemoContract.methods.get().call();
-                      }
-                      break;
-
-                    case "transaction_send":
-                      if (true) {
-                        const transaction_result = document.querySelector("#transaction_result")
-                        const transaction_txid = document.querySelector("#transaction_params")
-                        const transaction_rpc = document.querySelector("#transaction_rpc")
-                        const result  = await fetch(transaction_rpc.value, {
-                          method: "POST",
-                          headers: {
-                            Accept: "application/json",
-                            "Content-Type": "application/json",
-                          },
-                          // mode:"cors",
-                          body: JSON.stringify(
-                            {
-                                "jsonrpc": "2.0",
-                                "method": "eth_sendRawTransaction",
-                                "params": [ transaction_txid.value],
-                                "id": 0
-                            }
-                          ),
-                        })
-                          .then((response) => response.json())
-                          .catch((error) => {
-                             return error
-                          });
-                          transaction_result.value = typeof result=='object' ?  JSON.stringify(result, null,2) : result
-                      }
-
-                     
-
-                      break;
-                    case "parseTransaction_parse":
-                      if (true) {
-                        const parseTransaction_params = document.querySelector("#parseTransaction_params")
-                        const parseTransaction_result = document.querySelector("#parseTransaction_result")
-                        let result =''
-                        try {
-                           result =ethers.utils.parseTransaction(parseTransaction_params.value)
-                        } catch (error) {
-                          result = error
-                        }
-                      
-                        parseTransaction_result.value = typeof result =='string' ? result :  JSON.stringify(result,null,2)
-                      }
-
-                      break;
+                ),
+              })
+                .then((response) => response.json())
+                .catch((error) => {
+                  return error
+                });
+              transaction_result.value = typeof result == 'object' ? JSON.stringify(result, null, 2) : result
+            }
+            break;
+        }
+      };
+    });
 
 
-                      case "transaction_search":
-                      if (true) {
-                        const transaction_result = document.querySelector("#transaction_search_result")
-                        const transaction_txid = document.querySelector("#transaction_search_params")
-                        const transaction_rpc = document.querySelector("#transaction_search_rpc")
-                        const result  = await fetch(transaction_rpc.value, {
-                          method: "POST",
-                          headers: {
-                            Accept: "application/json",
-                            "Content-Type": "application/json",
-                          },
-                          // mode:"cors",
-                          body: JSON.stringify(
-                            {
-                                "jsonrpc": "2.0",
-                                "method": "eth_getTransactionByHash",
-                                "params": [ transaction_txid.value],
-                                "id": 0
-                            }
-                          ),
-                        })
-                          .then((response) => response.json())
-                          .catch((error) => {
-                             return error
-                          });
-                          transaction_result.value = typeof result=='object' ?  JSON.stringify(result, null,2) : result
-                      }
-                      break;
-                  }
-                };
-              });
+    //init
+    const wallet = new Wallet();
+    wallet.connect();
+    window.wallet = wallet;
 
 
-              //init
-              const wallet = new Wallet();
-              wallet.connect();
-              window.wallet = wallet;
-
-              function codeRender(type, data) {
-                const codeDoms = document.querySelectorAll("code[data-code]");
-                const codeDom = document.querySelectorAll("code[data-code=" + type + "]");
-                const codeDomData = document.querySelector("#" + type);
-                switch (type) {
-                  case "personal_sign":
-                    if (codeDom) {
-                      codeDom.innerHTML = `window.ethereum.request({method:"personal_sign", params:[${codeDomData.value}, ${wallet.selectedAddress}], from: ${wallet.selectedAddress}})`;
-                    }
-                    break;
-
-                  default:
-                    break;
-                }
-              }
 
               //doc
               //https://metamask.github.io/api-playground/api-documentation/#wallet_switchEthereumChain
               // https://github.com/MetaMask/metamask-docs/blob/main/docs/guide/signing-data.md
               //https://docs.metamask.io/guide/
-    </script>
-  </body>
-</html>
+  </script>
+</body>
 
-<!-- __jHost('dappsSign', 'ht', JSON.stringify({
-  "coin": "ht",
-         "contract": "",
-         "from": ethereum.selectedAddress,
-         "to": ethereum.selectedAddress,
-         "value": "0.01",
-         "data": "",
-         "nonce": 1114,
-         "gasLimit": "23436",
-         "gasPrice": "0.00000000225",
-         "chainId": "128"
-}), function (err, reply) {
- console.log(err, reply)
-}) -->
+</html>

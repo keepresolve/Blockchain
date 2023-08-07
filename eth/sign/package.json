@@ -9,6 +9,7 @@
   "author": "caoshiyuan",
   "license": "ISC",
   "dependencies": {
+    "@ethereumjs/tx": "^4.2.0",
     "eth-sig-util": "^3.0.1",
     "ethers": "^5.7.2",
     "siwe": "^1.1.6"

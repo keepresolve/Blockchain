@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@chainsafe/bls-keygen": "^0.4.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "@mysten/wallet-adapter-react": "^7.0.0",
     "@suiet/wallet-adapter": "^0.0.18",

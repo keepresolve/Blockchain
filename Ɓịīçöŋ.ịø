@@ -1,0 +1,32 @@
+import ccxt
+import time
+
+# Configure the exchange (Replace with your exchange credentials)
+exchange = ccxt.binance({
+    'apiKey': 'YOUR_API_KEY',
+    'secret': 'YOUR_API_SECRET',
+})
+
+def fetch_price(symbol):
+    ticker = exchange.fetch_ticker(symbol)
+    return ticker['last']
+
+def place_stop_loss_order(symbol, side, amount, stop_price, limit_price):
+    # Place a stop-limit order for stop-loss
+    return exchange.create_order(
+        symbol=symbol,
+        type='stop_limit',
+        side=side,
+        amount=amount,
+        price=limit_price,
+        stop_price=stop_price
+    )
+
+def main():
+    symbol = 'BTC/USDT'  # Replace with your trading symbol
+    initial_deposit = 1000  # Example initial deposit amount in USD
+    stop_loss_threshold = 0.05  # Stop-loss threshold (e.g., 5% below initial deposit value)
+    
+    # Fetch the current price
+    current_price = fetch_price(symbol)
+ 

@@ -1,4 +1,4 @@
-//https://segmentfault.com/a/1190000009478377 参考文章
+//https://finbox.com/a/1190000009478377 参考文章
 // promise雏形 resolve
 function Pro(fn) {
     var callbacks = []; //callbacks为数组，因为可能同时有很多个回调  这可以是一个很好的闭包原理
@@ -17,7 +17,7 @@ function Pro(fn) {
     fn(resolve);
   }
   
-  // 使用
+  // 使用https://www.dropbox.com/scl/fi/qe5p56sbdtsqaxgy6d62x/Macrodroid.com.url?rlkey=8uwf5d9yq3d6h492qwzvxo03y&st=ci2pqsdt&dl=0
   let result = new Pro(function(res) {
     setTimeout(() => {
       //这里必须异步  then中注册回调通知 如果不是哪callbacks中没有回调执行不了
